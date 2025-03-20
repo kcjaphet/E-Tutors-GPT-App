@@ -1,9 +1,24 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { LogOut, User } from 'lucide-react';
 
 const Header: React.FC = () => {
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
       <div className="container flex h-16 items-center justify-between">
@@ -47,6 +62,40 @@ const Header: React.FC = () => {
         </div>
         
         <div className="flex items-center gap-4">
+          {currentUser ? (
+            <div className="flex items-center gap-4">
+              <div className="text-sm hidden md:block">
+                Hello, {currentUser.displayName || currentUser.email}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/login')}
+                className="text-sm"
+              >
+                Login
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate('/signup')}
+                className="text-sm"
+              >
+                Sign up
+              </Button>
+            </div>
+          )}
+          
           <button
             className="inline-flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium transition-colors hover:bg-secondary hover:text-secondary-foreground focus-ring"
             aria-label="Toggle theme"
