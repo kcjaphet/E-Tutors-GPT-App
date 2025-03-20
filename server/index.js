@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const detectRoutes = require('./routes/detect');
+const humanizeRoutes = require('./routes/humanize');
 
 // Load environment variables
 dotenv.config();
@@ -16,6 +17,7 @@ app.use(express.json({ limit: '10mb' }));
 
 // Routes
 app.use('/api', detectRoutes);
+app.use('/api', humanizeRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
