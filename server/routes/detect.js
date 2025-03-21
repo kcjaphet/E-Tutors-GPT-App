@@ -2,13 +2,14 @@
 const express = require('express');
 const router = express.Router();
 const { detectAIText } = require('../services/detectionService');
+const checkSubscription = require('../middleware/checkSubscription');
 
 /**
  * @route   POST /api/detect-ai-text
  * @desc    Detect if text is AI-generated
- * @access  Public (can be made private with auth middleware)
+ * @access  Public (with subscription limits)
  */
-router.post('/detect-ai-text', async (req, res) => {
+router.post('/detect-ai-text', checkSubscription, async (req, res) => {
   try {
     const { text, userId } = req.body;
     

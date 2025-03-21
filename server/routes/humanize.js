@@ -2,13 +2,14 @@
 const express = require('express');
 const router = express.Router();
 const { humanizeText } = require('../services/humanizationService');
+const checkSubscription = require('../middleware/checkSubscription');
 
 /**
  * @route   POST /api/humanize-text
  * @desc    Humanize AI-generated text to make it sound more natural
- * @access  Public (can be made private with auth middleware)
+ * @access  Public (with subscription limits)
  */
-router.post('/humanize-text', async (req, res) => {
+router.post('/humanize-text', checkSubscription, async (req, res) => {
   try {
     const { text, userId } = req.body;
     

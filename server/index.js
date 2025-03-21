@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const detectRoutes = require('./routes/detect');
 const humanizeRoutes = require('./routes/humanize');
+const paymentRoutes = require('./routes/payment');
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.json({ limit: '10mb' }));
 // Routes
 app.use('/api', detectRoutes);
 app.use('/api', humanizeRoutes);
+app.use('/api', paymentRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

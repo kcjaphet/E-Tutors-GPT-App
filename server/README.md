@@ -1,12 +1,13 @@
 
 # GPTTextTools Backend API
 
-This is the backend API for GPTTextTools, providing endpoints for AI text detection and text humanization.
+This is the backend API for GPTTextTools, providing endpoints for AI text detection, text humanization, and subscription management.
 
 ## Features
 
 - **AI Text Detection**: Analyze text to determine if it was likely written by AI
 - **Text Humanization**: Transform AI-generated content to be more natural
+- **Subscription Management**: Freemium model with Stripe integration
 - **MongoDB Integration**: Store analysis results and user history
 - **OpenAI API**: Leverage GPT models for text transformation (when API key is provided)
 
@@ -18,6 +19,7 @@ This is the backend API for GPTTextTools, providing endpoints for AI text detect
 - npm or yarn
 - MongoDB (local instance or MongoDB Atlas)
 - OpenAI API key (for production humanization)
+- Stripe account and API keys (for subscription management)
 
 ### Installation
 
@@ -32,6 +34,13 @@ This is the backend API for GPTTextTools, providing endpoints for AI text detect
    MONGO_URI=mongodb://localhost:27017/gpt-text-tools
    OPENAI_API_KEY=your_openai_api_key
    CORS_ORIGIN=http://localhost:5173
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+   STRIPE_MONTHLY_PRICE_ID=price_id_from_stripe
+   STRIPE_YEARLY_PRICE_ID=price_id_from_stripe
+   STRIPE_SUCCESS_URL=http://localhost:5173/account?success=true
+   STRIPE_CANCEL_URL=http://localhost:5173/account?canceled=true
+   INTERNAL_API_KEY=your_secure_internal_api_key
    ```
 
 3. Start the development server:
@@ -90,6 +99,90 @@ This is the backend API for GPTTextTools, providing endpoints for AI text detect
   }
   ```
 
+### Get Subscription
+- **URL**: `/api/subscription/:userId`
+- **Method**: `GET`
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "planType": "free",
+      "status": "active",
+      "usageThisMonth": {
+        "detections": 2,
+        "humanizations": 1
+      },
+      "currentPeriodEnd": "2023-07-01T00:00:00Z"
+    }
+  }
+  ```
+
+### Create Checkout Session
+- **URL**: `/api/create-checkout-session`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "userId": "user-id",
+    "planType": "monthly",
+    "successUrl": "http://example.com/success",
+    "cancelUrl": "http://example.com/cancel"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "sessionId": "cs_test_...",
+    "url": "https://checkout.stripe.com/..."
+  }
+  ```
+
+### Cancel Subscription
+- **URL**: `/api/cancel-subscription`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "userId": "user-id"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "Subscription will be canceled at the end of the current billing period"
+  }
+  ```
+
+### Update Usage
+- **URL**: `/api/update-usage`
+- **Method**: `POST`
+- **Body**:
+  ```json
+  {
+    "userId": "user-id",
+    "type": "detection"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "detections": 3,
+      "humanizations": 2
+    }
+  }
+  ```
+
+### Stripe Webhook
+- **URL**: `/api/webhook`
+- **Method**: `POST`
+- **Headers**: `stripe-signature: t=timestamp,v1=signature`
+- **Body**: Raw body from Stripe event
+
 ## Testing
 
 Run the test suite:
@@ -103,6 +196,23 @@ For more detailed testing information, see [TESTING.md](TESTING.md).
 ## Deployment
 
 For instructions on deploying to AWS Elastic Beanstalk, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+## Subscription Model
+
+### Free Plan
+- 5 AI text detections per month
+- 3 text humanizations per month
+- No payment required
+
+### Pro Monthly ($20/month)
+- Unlimited AI text detections
+- Unlimited text humanizations
+- Priority support
+- API access
+
+### Pro Yearly ($100/year)
+- Same features as Pro Monthly
+- Save over 50% compared to monthly billing
 
 ## Database Schema
 
@@ -123,6 +233,26 @@ For instructions on deploying to AWS Elastic Beanstalk, see [DEPLOYMENT.md](DEPL
 }
 ```
 
+### Subscription
+
+```javascript
+{
+  userId: String,           // User identifier
+  planType: String,         // 'free', 'monthly', or 'yearly'
+  stripeCustomerId: String, // Stripe customer ID
+  stripeSubscriptionId: String, // Stripe subscription ID
+  currentPeriodEnd: Date,   // When the current billing period ends
+  status: String,           // 'active', 'canceled', 'past_due', etc.
+  usageThisMonth: {
+    detections: Number,     // Count of detections this month
+    humanizations: Number   // Count of humanizations this month
+  },
+  createdAt: Date,          // When the subscription was created
+  updatedAt: Date           // When the subscription was last updated
+}
+```
+
 ## Implementation Notes
 
-In production, you should replace the placeholder detection service with actual API calls to services like GPTZero, OpenAI, or other specialized AI detection tools.
+- In production, you should replace the placeholder detection service with actual API calls to services like GPTZero, OpenAI, or other specialized AI detection tools.
+- For Stripe integration, you need to set up products and prices in your Stripe dashboard and configure the webhook endpoint.

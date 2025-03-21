@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Bot, User, RefreshCw, Upload, Copy, Check } from 'lucide-react';
+import { FileText, Bot, User, RefreshCw, Upload, Copy, Check, AlertTriangle } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TextEditor from '@/components/TextEditor';
@@ -27,6 +28,15 @@ interface HumanizationResult {
   note?: string;
 }
 
+interface Subscription {
+  planType: string;
+  status: string;
+  usageThisMonth: {
+    detections: number;
+    humanizations: number;
+  };
+}
+
 const Dashboard: React.FC = () => {
   const { currentUser } = useAuth();
   const { toast } = useToast();
@@ -37,11 +47,38 @@ const Dashboard: React.FC = () => {
   const [textCopied, setTextCopied] = useState(false);
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
   const [humanizationResult, setHumanizationResult] = useState<HumanizationResult | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   
   // Redirect if not logged in
   if (!currentUser) {
     return <Navigate to="/login" />;
   }
+
+  // Fetch subscription data on load
+  useEffect(() => {
+    if (currentUser) {
+      fetchSubscription();
+    }
+  }, [currentUser]);
+
+  const fetchSubscription = async () => {
+    setIsLoadingSubscription(true);
+    try {
+      const response = await fetch(`http://localhost:5000/api/subscription/${currentUser.uid}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setSubscription(data.data);
+      } else {
+        console.error('Failed to load subscription data');
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    } finally {
+      setIsLoadingSubscription(false);
+    }
+  };
 
   const handleTextChange = (value: string) => {
     setInputText(value);
@@ -80,6 +117,16 @@ const Dashboard: React.FC = () => {
       return;
     }
 
+    // Check subscription limits for free plan
+    if (subscription?.planType === 'free' && subscription?.usageThisMonth.detections >= 5) {
+      toast({
+        variant: "destructive",
+        title: "Usage limit reached",
+        description: "You've reached the free plan limit. Please upgrade to continue."
+      });
+      return;
+    }
+
     setIsDetecting(true);
     setDetectionResult(null);
     setHumanizationResult(null);
@@ -90,7 +137,10 @@ const Dashboard: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ 
+          text: inputText,
+          userId: currentUser.uid
+        }),
       });
       
       const responseData = await response.json();
@@ -118,6 +168,9 @@ ${responseData.data.analysis}
         title: "Detection complete",
         description: "AI detection analysis has been completed"
       });
+      
+      // Refresh subscription data to get updated usage
+      fetchSubscription();
     } catch (error) {
       console.error('Error detecting AI text:', error);
       toast({
@@ -140,6 +193,16 @@ ${responseData.data.analysis}
       return;
     }
 
+    // Check subscription limits for free plan
+    if (subscription?.planType === 'free' && subscription?.usageThisMonth.humanizations >= 3) {
+      toast({
+        variant: "destructive",
+        title: "Usage limit reached",
+        description: "You've reached the free plan limit. Please upgrade to continue."
+      });
+      return;
+    }
+
     setIsHumanizing(true);
     setDetectionResult(null);
     setHumanizationResult(null);
@@ -150,7 +213,10 @@ ${responseData.data.analysis}
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text: inputText }),
+        body: JSON.stringify({ 
+          text: inputText,
+          userId: currentUser.uid 
+        }),
       });
       
       const responseData = await response.json();
@@ -170,6 +236,9 @@ ${responseData.data.analysis}
         title: "Humanization complete",
         description: responseData.data.note || "Your text has been humanized successfully"
       });
+      
+      // Refresh subscription data to get updated usage
+      fetchSubscription();
     } catch (error) {
       console.error('Error humanizing text:', error);
       toast({
@@ -200,6 +269,31 @@ ${responseData.data.analysis}
       <main className="container mx-auto px-4 py-10">
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">Text Analysis Dashboard</h1>
+          
+          {/* Subscription info card */}
+          {subscription && subscription.planType === 'free' && (
+            <Card className="mb-6 border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold mb-1">Free Plan Limits</h3>
+                    <p className="text-sm text-muted-foreground">
+                      You've used {subscription.usageThisMonth.detections}/5 detections and {subscription.usageThisMonth.humanizations}/3 humanizations this month.
+                      <Button 
+                        variant="link" 
+                        className="h-auto p-0 text-primary font-medium" 
+                        onClick={() => window.location.href = '/pricing'}
+                      >
+                        Upgrade now
+                      </Button>
+                      {' '}for unlimited access.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
           
           <Card className="mb-8">
             <CardHeader>
@@ -237,7 +331,12 @@ ${responseData.data.analysis}
             <CardFooter className="flex gap-4">
               <Button 
                 onClick={detectAIText} 
-                disabled={isDetecting || isHumanizing || !inputText.trim()}
+                disabled={
+                  isDetecting || 
+                  isHumanizing || 
+                  !inputText.trim() || 
+                  (subscription?.planType === 'free' && subscription?.usageThisMonth.detections >= 5)
+                }
                 className="flex items-center gap-2"
               >
                 {isDetecting ? (
@@ -249,7 +348,12 @@ ${responseData.data.analysis}
               </Button>
               <Button 
                 onClick={humanizeText} 
-                disabled={isDetecting || isHumanizing || !inputText.trim()}
+                disabled={
+                  isDetecting || 
+                  isHumanizing || 
+                  !inputText.trim() || 
+                  (subscription?.planType === 'free' && subscription?.usageThisMonth.humanizations >= 3)
+                }
                 className="flex items-center gap-2"
                 variant="outline"
               >
