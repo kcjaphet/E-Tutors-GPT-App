@@ -1,69 +1,154 @@
-# Welcome to your Lovable project
 
-## Project info
+# GPTTextTools
 
-**URL**: https://lovable.dev/projects/fce41b40-e9da-48dd-a848-8bf410a72b46
+A modern web application that detects AI-generated text and helps humanize it for a more natural tone. Built with React (frontend) and Express.js (backend).
 
-## How can I edit this code?
+![GPTTextTools Banner](public/og-image.png)
 
-There are several ways of editing your application.
+## 🚀 Features
 
-**Use Lovable**
+- **AI Text Detection**: Analyze text to determine if it was likely written by AI.
+- **Text Humanization**: Transform AI-generated content to sound more natural and human-like.
+- **User Dashboard**: Track your detection and humanization history.
+- **Responsive Design**: Works on desktop, tablet, and mobile devices.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/fce41b40-e9da-48dd-a848-8bf410a72b46) and start prompting.
+## 📋 Table of Contents
 
-Changes made via Lovable will be committed automatically to this repo.
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Environment Variables](#environment-variables)
+- [Development](#development)
+  - [Running the Frontend](#running-the-frontend)
+  - [Running the Backend](#running-the-backend)
+  - [Testing](#testing)
+- [Deployment](#deployment)
+  - [Frontend Deployment (Vercel)](#frontend-deployment-vercel)
+  - [Backend Deployment (AWS)](#backend-deployment-aws)
+- [Technologies Used](#technologies-used)
+- [License](#license)
 
-**Use your preferred IDE**
+## 🏗️ Project Structure
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+```
+gpt-text-tools/
+├── public/              # Public assets
+├── src/                 # Frontend source code
+│   ├── components/      # React components
+│   ├── config/          # Configuration files
+│   ├── contexts/        # React contexts
+│   ├── hooks/           # Custom React hooks
+│   ├── lib/             # Utility libraries
+│   └── pages/           # Page components
+├── server/              # Backend source code
+│   ├── config/          # Server configuration
+│   ├── models/          # Mongoose schemas
+│   ├── routes/          # API routes
+│   ├── services/        # Business logic
+│   └── __tests__/       # Backend tests
+└── README.md            # Project documentation
+```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚦 Getting Started
 
-Follow these steps:
+### Prerequisites
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- Node.js (v14 or higher)
+- npm or yarn
+- MongoDB (local or Atlas)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Installation
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. **Clone the repository**:
+   ```bash
+   git clone <repository-url>
+   cd gpt-text-tools
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+2. **Install dependencies**:
+   ```bash
+   # Install frontend dependencies
+   npm install
+   
+   # Install backend dependencies
+   cd server
+   npm install
+   cd ..
+   ```
+
+### Environment Variables
+
+1. **Frontend**: Create a `.env` file in the project root:
+   ```
+   VITE_API_URL=http://localhost:5000
+   ```
+
+2. **Backend**: Create a `.env` file in the `server` directory:
+   ```
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/gpt-text-tools
+   OPENAI_API_KEY=your_openai_api_key
+   CORS_ORIGIN=http://localhost:5173
+   ```
+
+## 💻 Development
+
+### Running the Frontend
+
+```bash
+# From the project root
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The frontend will be available at `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Running the Backend
 
-**Use GitHub Codespaces**
+```bash
+# From the server directory
+cd server
+npm run dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The API will be available at `http://localhost:5000`.
 
-## What technologies are used for this project?
+### Testing
 
-This project is built with .
+```bash
+# From the server directory
+cd server
+npm test
+```
 
-- Vite
-- TypeScript
+This will run the Jest test suite for the backend.
+
+## 🚢 Deployment
+
+### Frontend Deployment (Vercel)
+
+See [FRONTEND_DEPLOYMENT.md](FRONTEND_DEPLOYMENT.md) for detailed instructions on deploying to Vercel.
+
+### Backend Deployment (AWS)
+
+See [server/DEPLOYMENT.md](server/DEPLOYMENT.md) for detailed instructions on deploying to AWS Elastic Beanstalk.
+
+## 🛠️ Technologies Used
+
+**Frontend**:
 - React
-- shadcn-ui
+- TypeScript
 - Tailwind CSS
+- shadcn/ui
+- React Router
+- Tanstack React Query
 
-## How can I deploy this project?
+**Backend**:
+- Express.js
+- MongoDB & Mongoose
+- OpenAI API
+- Jest & Supertest (testing)
 
-Simply open [Lovable](https://lovable.dev/projects/fce41b40-e9da-48dd-a848-8bf410a72b46) and click on Share -> Publish.
+## 📄 License
 
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+[MIT License](LICENSE)
