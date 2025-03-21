@@ -10,7 +10,7 @@ const { detectAIText } = require('../services/detectionService');
  */
 router.post('/detect-ai-text', async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, userId } = req.body;
     
     if (!text || text.trim() === '') {
       return res.status(400).json({ 
@@ -19,7 +19,7 @@ router.post('/detect-ai-text', async (req, res) => {
       });
     }
 
-    const result = await detectAIText(text);
+    const result = await detectAIText(text, userId || 'anonymous');
     
     return res.json({
       success: true,

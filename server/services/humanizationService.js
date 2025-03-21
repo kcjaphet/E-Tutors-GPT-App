@@ -1,5 +1,6 @@
 
 const OpenAI = require('openai');
+const DetectionResult = require('../models/DetectionResult');
 
 // Initialize OpenAI with API key
 const openai = new OpenAI({
@@ -9,45 +10,95 @@ const openai = new OpenAI({
 /**
  * Humanizes text using OpenAI's API
  * @param {string} text - The text to humanize
+ * @param {string} userId - The user ID
  * @returns {Promise<Object>} Humanization results
  */
-async function humanizeText(text) {
+async function humanizeText(text, userId = 'anonymous') {
   try {
-    // If no OpenAI API key is provided, return a mock response
+    let humanizedText;
+    let note;
+    
+    // If no OpenAI API key is provided, use mock humanization
     if (!process.env.OPENAI_API_KEY) {
       console.warn('No OpenAI API key provided. Using mock humanization.');
-      return mockHumanization(text);
+      const mockResult = mockHumanization(text);
+      humanizedText = mockResult.humanizedText;
+      note = mockResult.note;
+    } else {
+      // Use OpenAI API
+      const response = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an assistant that rewrites text to sound more natural and human-like. Maintain the original meaning but make the text flow better, use varied sentence structures, and eliminate patterns typical of AI-generated content."
+          },
+          {
+            role: "user",
+            content: `Rewrite the following text to sound more human-like, natural, and less like AI-generated content: \n\n${text}`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      });
+      
+      humanizedText = response.choices[0].message.content.trim();
     }
+
+    // Find if there's an existing record for this text from the same user
+    let detectionResult = await DetectionResult.findOne({ 
+      userId, 
+      originalText: text 
+    }).sort({ timestamp: -1 });
     
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are an assistant that rewrites text to sound more natural and human-like. Maintain the original meaning but make the text flow better, use varied sentence structures, and eliminate patterns typical of AI-generated content."
-        },
-        {
-          role: "user",
-          content: `Rewrite the following text to sound more human-like, natural, and less like AI-generated content: \n\n${text}`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1500,
-    });
+    // If a record exists, update it with the humanized text
+    if (detectionResult) {
+      detectionResult.humanizedText = humanizedText;
+      await detectionResult.save();
+    } else {
+      // If no record exists, create a new one
+      detectionResult = new DetectionResult({
+        userId,
+        originalText: text,
+        humanizedText,
+        timestamp: new Date()
+      });
+      await detectionResult.save();
+    }
 
     // Return the humanized text
     return {
       originalText: text,
-      humanizedText: response.choices[0].message.content.trim(),
+      humanizedText,
       textLength: text.length,
-      timestamp: new Date().toISOString()
+      timestamp: detectionResult.timestamp.toISOString(),
+      resultId: detectionResult._id,
+      note
     };
   } catch (error) {
     console.error('Error in OpenAI API call:', error);
     
     // Fallback to mock humanization if API call fails
     console.warn('OpenAI API call failed. Using mock humanization.');
-    return mockHumanization(text);
+    const mockResult = mockHumanization(text);
+    
+    // Save mock result to database
+    const detectionResult = new DetectionResult({
+      userId,
+      originalText: text,
+      humanizedText: mockResult.humanizedText,
+      timestamp: new Date()
+    });
+    await detectionResult.save();
+    
+    return {
+      originalText: text,
+      humanizedText: mockResult.humanizedText,
+      textLength: text.length,
+      timestamp: detectionResult.timestamp.toISOString(),
+      resultId: detectionResult._id,
+      note: mockResult.note
+    };
   }
 }
 
@@ -71,10 +122,7 @@ function mockHumanization(text) {
     .replace(/cannot/g, "can't");
   
   return {
-    originalText: text,
     humanizedText: mockedHumanizedText,
-    textLength: text.length,
-    timestamp: new Date().toISOString(),
     note: "This is a mock humanization since the OpenAI API key is not configured or the API call failed."
   };
 }

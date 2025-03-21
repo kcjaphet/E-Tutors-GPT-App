@@ -1,4 +1,6 @@
 
+const DetectionResult = require('../models/DetectionResult');
+
 /**
  * Service for AI text detection
  * In a production environment, this would integrate with a real AI detection API
@@ -8,9 +10,10 @@
 /**
  * Detects if text is AI-generated
  * @param {string} text - The text to analyze
+ * @param {string} userId - The user ID
  * @returns {Promise<Object>} Detection results
  */
-async function detectAIText(text) {
+async function detectAIText(text, userId = 'anonymous') {
   // This is a placeholder implementation
   // In production, you would replace this with an actual API call
   
@@ -49,13 +52,29 @@ async function detectAIText(text) {
       analysis = 'This text appears to be primarily human-written. Few or no indicators of AI generation were detected.';
     }
     
-    // Return detection results
-    return {
+    // Create detection results object
+    const detectionResults = {
       aiProbability: Math.round(aiProbability * 10) / 10, // Round to 1 decimal place
       confidenceLevel,
       analysis,
-      textLength,
-      timestamp: new Date().toISOString()
+      textLength
+    };
+    
+    // Save results to MongoDB
+    const detectionResult = new DetectionResult({
+      userId,
+      originalText: text,
+      detectionResults,
+      timestamp: new Date()
+    });
+    
+    await detectionResult.save();
+    
+    // Return detection results
+    return {
+      ...detectionResults,
+      timestamp: detectionResult.timestamp.toISOString(),
+      resultId: detectionResult._id
     };
     
   } catch (error) {
