@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const stripe = require('../config/stripe');
-const webhookService = require('../services/webhookService');
+const webhookController = require('../controllers/webhookController');
 
 /**
  * @route   POST /api/webhook
@@ -20,30 +20,8 @@ router.post('/webhook', express.raw({type: 'application/json'}), async (req, res
       process.env.STRIPE_WEBHOOK_SECRET
     );
 
-    // Handle different event types
-    switch (event.type) {
-      case 'customer.subscription.created':
-        await webhookService.handleSubscriptionUpdated(event.data.object);
-        break;
-      case 'customer.subscription.updated':
-        await webhookService.handleSubscriptionUpdated(event.data.object);
-        break;
-      case 'customer.subscription.deleted':
-        await webhookService.handleSubscriptionCanceled(event.data.object);
-        break;
-      case 'checkout.session.completed':
-        const session = event.data.object;
-        if (session.mode === 'subscription') {
-          const subscriptionId = session.subscription;
-          const userId = session.metadata.userId;
-          const planType = session.metadata.planType;
-          
-          if (userId) {
-            await webhookService.handleSubscriptionCreated(subscriptionId, userId, planType);
-          }
-        }
-        break;
-    }
+    // Process the event using the controller
+    await webhookController.processWebhookEvent(event);
 
     res.status(200).json({ received: true });
   } catch (error) {
