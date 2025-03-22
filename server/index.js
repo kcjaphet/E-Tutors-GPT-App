@@ -19,10 +19,12 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
 
 // Special handling for Stripe webhooks (needs raw body)
 app.use('/api/webhook', webhookRoutes);
+
+// Regular JSON parsing for all other routes
+app.use(express.json({ limit: '10mb' }));
 
 // Routes
 app.use('/api', detectRoutes);

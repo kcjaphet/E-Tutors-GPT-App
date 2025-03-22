@@ -59,6 +59,9 @@ router.post('/create-checkout-session', async (req, res) => {
       await subscription.save();
     }
 
+    // Default success URL if not provided
+    const defaultSuccessUrl = `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/subscription-success`;
+
     // Create the checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -70,8 +73,8 @@ router.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'subscription',
-      success_url: successUrl || process.env.STRIPE_SUCCESS_URL,
-      cancel_url: cancelUrl || process.env.STRIPE_CANCEL_URL,
+      success_url: successUrl || defaultSuccessUrl,
+      cancel_url: cancelUrl || process.env.STRIPE_CANCEL_URL || `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/pricing`,
       metadata: {
         userId: userId,
         planType: planType

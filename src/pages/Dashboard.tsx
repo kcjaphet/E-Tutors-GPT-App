@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Bot, User, RefreshCw, Upload, Copy, Check, AlertTriangle } from 'lucide-react';
+import { FileText, Bot, User, RefreshCw, Upload, Copy, Check, AlertTriangle, CreditCard, Sparkles } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TextEditor from '@/components/TextEditor';
@@ -35,6 +34,7 @@ interface Subscription {
     detections: number;
     humanizations: number;
   };
+  currentPeriodEnd?: Date;
 }
 
 const Dashboard: React.FC = () => {
@@ -263,6 +263,32 @@ ${responseData.data.analysis}
     setTimeout(() => setTextCopied(false), 2000);
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }).format(date);
+  };
+
+  const getRemainingUsage = () => {
+    if (!subscription) return { detections: 0, humanizations: 0 };
+    
+    if (subscription.planType === 'free') {
+      return {
+        detections: Math.max(0, 5 - subscription.usageThisMonth.detections),
+        humanizations: Math.max(0, 3 - subscription.usageThisMonth.humanizations)
+      };
+    }
+    
+    // Unlimited for paid plans
+    return { detections: '∞', humanizations: '∞' };
+  };
+
+  const remaining = getRemainingUsage();
+
   return (
     <>
       <Header />
@@ -271,25 +297,93 @@ ${responseData.data.analysis}
           <h1 className="text-3xl font-bold mb-6">Text Analysis Dashboard</h1>
           
           {/* Subscription info card */}
-          {subscription && subscription.planType === 'free' && (
-            <Card className="mb-6 border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20">
+          {subscription && (
+            <Card className="mb-6 bg-muted/20">
               <CardContent className="pt-6">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5" />
-                  <div>
-                    <h3 className="font-semibold mb-1">Free Plan Limits</h3>
-                    <p className="text-sm text-muted-foreground">
-                      You've used {subscription.usageThisMonth.detections}/5 detections and {subscription.usageThisMonth.humanizations}/3 humanizations this month.
-                      <Button 
-                        variant="link" 
-                        className="h-auto p-0 text-primary font-medium" 
-                        onClick={() => window.location.href = '/pricing'}
-                      >
-                        Upgrade now
-                      </Button>
-                      {' '}for unlimited access.
-                    </p>
+                  {subscription.planType === 'free' ? (
+                    <AlertTriangle className="w-5 h-5 text-yellow-500 mt-0.5" />
+                  ) : (
+                    <Sparkles className="w-5 h-5 text-primary mt-0.5" />
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="font-semibold flex items-center gap-2">
+                        {subscription.planType === 'monthly' 
+                          ? 'Monthly Plan' 
+                          : subscription.planType === 'yearly' 
+                            ? 'Yearly Plan' 
+                            : 'Free Plan'}
+                        {subscription.status !== 'active' && (
+                          <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full dark:bg-red-900/20 dark:text-red-300">
+                            {subscription.status}
+                          </span>
+                        )}
+                      </h3>
+                      {subscription.currentPeriodEnd && subscription.planType !== 'free' && (
+                        <span className="text-xs text-muted-foreground">
+                          Renews: {formatDate(subscription.currentPeriodEnd.toString())}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-x-6 gap-y-2 mt-2">
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">AI Detections:</span>{' '}
+                        <span className="font-medium">
+                          {subscription.planType === 'free' 
+                            ? `${subscription.usageThisMonth.detections}/5 used`
+                            : `${subscription.usageThisMonth.detections} used (Unlimited)`}
+                        </span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Humanizations:</span>{' '}
+                        <span className="font-medium">
+                          {subscription.planType === 'free' 
+                            ? `${subscription.usageThisMonth.humanizations}/3 used`
+                            : `${subscription.usageThisMonth.humanizations} used (Unlimited)`}
+                        </span>
+                      </div>
+                      
+                      {subscription.planType === 'free' && (
+                        <div className="w-full mt-2">
+                          <Button 
+                            variant="default" 
+                            size="sm" 
+                            className="h-8"
+                            onClick={() => window.location.href = '/pricing'}
+                          >
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            Upgrade for unlimited access
+                          </Button>
+                        </div>
+                      )}
+                      
+                      {subscription.planType !== 'free' && (
+                        <div className="w-full mt-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8"
+                            onClick={() => window.location.href = '/account'}
+                          >
+                            Manage subscription
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {isLoadingSubscription && (
+            <Card className="mb-6">
+              <CardContent className="pt-6 pb-4">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <p className="text-sm text-muted-foreground">Loading subscription information...</p>
                 </div>
               </CardContent>
             </Card>
@@ -345,6 +439,9 @@ ${responseData.data.analysis}
                   <Bot className="w-4 h-4" />
                 )}
                 {isDetecting ? "Detecting..." : "Detect AI Text"}
+                {subscription?.planType === 'free' && typeof remaining.detections === 'number' && (
+                  <span className="ml-1 text-xs opacity-80">({remaining.detections} left)</span>
+                )}
               </Button>
               <Button 
                 onClick={humanizeText} 
@@ -363,6 +460,9 @@ ${responseData.data.analysis}
                   <User className="w-4 h-4" />
                 )}
                 {isHumanizing ? "Humanizing..." : "Humanize Text"}
+                {subscription?.planType === 'free' && typeof remaining.humanizations === 'number' && (
+                  <span className="ml-1 text-xs opacity-80">({remaining.humanizations} left)</span>
+                )}
               </Button>
             </CardFooter>
           </Card>
