@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 const detectRoutes = require('./routes/detect');
 const humanizeRoutes = require('./routes/humanize');
 const paymentRoutes = require('./routes/payment');
+const webhookRoutes = require('./routes/webhook');
 
 // Load environment variables
 dotenv.config();
@@ -19,6 +20,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
+
+// Special handling for Stripe webhooks (needs raw body)
+app.use('/api/webhook', webhookRoutes);
 
 // Routes
 app.use('/api', detectRoutes);
