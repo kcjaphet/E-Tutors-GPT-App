@@ -10,4 +10,5 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:50
 export const API_ENDPOINTS = {
   DETECT_AI_TEXT: `${API_BASE_URL}/api/detect-ai-text`,
   HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
+  LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
 };

@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Toaster } from '@/components/ui/toaster';
 import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
@@ -8,14 +8,16 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import Dashboard from '@/pages/Dashboard';
 import Account from '@/pages/Account';
 import Pricing from '@/pages/Pricing';
-import NotFound from '@/pages/NotFound';
-import { Toaster } from '@/components/ui/toaster';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
+import NotFound from '@/pages/NotFound';
+import LiteratureReview from '@/pages/LiteratureReview';
 
 function App() {
+  
   return (
-    <BrowserRouter>
-      <AuthProvider>
+    <Router>
+      <div className="App">
+        <Toaster position="top-right" />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
@@ -25,11 +27,11 @@ function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/subscription-success" element={<SubscriptionSuccess />} />
+          <Route path="/literature-review" element={<LiteratureReview />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Toaster />
-      </AuthProvider>
-    </BrowserRouter>
+      </div>
+    </Router>
   );
 }
 

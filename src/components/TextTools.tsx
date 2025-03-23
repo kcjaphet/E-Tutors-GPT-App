@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import ToolCard from './ToolCard';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 // Icons
 import {
@@ -13,7 +13,8 @@ import {
   Wand2,
   RefreshCw,
   ArrowUp,
-  Check
+  Check,
+  BookText
 } from 'lucide-react';
 
 type Tool = {
@@ -22,6 +23,7 @@ type Tool = {
   description: string;
   icon: React.ReactNode;
   prompt: string;
+  linkTo?: string;
 };
 
 const tools: Tool[] = [
@@ -67,6 +69,14 @@ const tools: Tool[] = [
     icon: <Wand2 className="w-5 h-5" />,
     prompt: 'Enhance the following text to make it more professional:'
   },
+  {
+    id: 'literature-review',
+    title: 'Literature Review',
+    description: 'Generate a structured literature review',
+    icon: <BookText className="w-5 h-5" />,
+    linkTo: '/literature-review',
+    prompt: ''
+  },
 ];
 
 const TextTools: React.FC = () => {
@@ -78,10 +88,17 @@ const TextTools: React.FC = () => {
   const [tone, setTone] = useState<string>('professional');
 
   const handleToolSelect = (toolId: string) => {
+    const tool = tools.find(t => t.id === toolId);
+    
+    if (tool?.linkTo) {
+      // If the tool has a link, we don't need to select it
+      return;
+    }
+    
     setSelectedTool(toolId);
     setOutputText('');
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -136,14 +153,26 @@ const TextTools: React.FC = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         {tools.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            title={tool.title}
-            description={tool.description}
-            icon={tool.icon}
-            onClick={() => handleToolSelect(tool.id)}
-            isSelected={selectedTool === tool.id}
-          />
+          tool.linkTo ? (
+            <Link to={tool.linkTo} key={tool.id}>
+              <ToolCard
+                title={tool.title}
+                description={tool.description}
+                icon={tool.icon}
+                onClick={() => {}}
+                isSelected={false}
+              />
+            </Link>
+          ) : (
+            <ToolCard
+              key={tool.id}
+              title={tool.title}
+              description={tool.description}
+              icon={tool.icon}
+              onClick={() => handleToolSelect(tool.id)}
+              isSelected={selectedTool === tool.id}
+            />
+          )
         ))}
       </div>
       
