@@ -27,7 +27,7 @@ const Header: React.FC = () => {
             <img 
               src="/lovable-uploads/8a8980a6-d9dd-403a-83d0-5c0b142b0f6e.png" 
               alt="e-tutors logo" 
-              className="h-8" 
+              className="h-12" 
             />
           </NavLink>
           
