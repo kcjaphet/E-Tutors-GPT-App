@@ -4,11 +4,12 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const handleLogout = async () => {
     try {
@@ -19,13 +20,17 @@ const Header: React.FC = () => {
     }
   };
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center gap-2">
             <span className="text-xl font-semibold tracking-tight">
-              GPTTextTools
+              CompanyName
             </span>
           </NavLink>
           
@@ -41,15 +46,6 @@ const Header: React.FC = () => {
               Home
             </NavLink>
             <NavLink 
-              to="/tools" 
-              className={({isActive}) => cn(
-                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
-                isActive ? "text-primary font-medium" : "text-muted-foreground"
-              )}
-            >
-              Tools
-            </NavLink>
-            <NavLink 
               to="/about" 
               className={({isActive}) => cn(
                 "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
@@ -57,6 +53,24 @@ const Header: React.FC = () => {
               )}
             >
               About
+            </NavLink>
+            <NavLink 
+              to="/services" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+            >
+              Services
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+            >
+              Contact
             </NavLink>
           </nav>
         </div>
@@ -77,7 +91,7 @@ const Header: React.FC = () => {
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
@@ -97,14 +111,90 @@ const Header: React.FC = () => {
           )}
           
           <button
-            className="inline-flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium transition-colors hover:bg-secondary hover:text-secondary-foreground focus-ring"
-            aria-label="Toggle theme"
+            className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={toggleMenu}
+            aria-label="Toggle menu"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-moon hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sun block dark:hidden"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+            {isMenuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </button>
         </div>
       </div>
+      
+      {/* Mobile menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-800">
+          <div className="container py-3 space-y-1">
+            <NavLink 
+              to="/" 
+              className={({isActive}) => cn(
+                "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                isActive ? "bg-gray-100 dark:bg-gray-800 text-primary" : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+              )}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </NavLink>
+            <NavLink 
+              to="/about" 
+              className={({isActive}) => cn(
+                "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                isActive ? "bg-gray-100 dark:bg-gray-800 text-primary" : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+              )}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </NavLink>
+            <NavLink 
+              to="/services" 
+              className={({isActive}) => cn(
+                "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                isActive ? "bg-gray-100 dark:bg-gray-800 text-primary" : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+              )}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Services
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              className={({isActive}) => cn(
+                "block px-3 py-2 rounded-md text-base font-medium transition-colors",
+                isActive ? "bg-gray-100 dark:bg-gray-800 text-primary" : "text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+              )}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
+            </NavLink>
+            
+            {!currentUser && (
+              <div className="pt-2 space-y-2">
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    navigate('/login');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Login
+                </Button>
+                <Button 
+                  className="w-full justify-start"
+                  onClick={() => {
+                    navigate('/signup');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Sign up
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 };
