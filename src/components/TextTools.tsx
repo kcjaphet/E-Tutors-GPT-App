@@ -14,7 +14,9 @@ import {
   RefreshCw,
   ArrowUp,
   Check,
-  BookText
+  BookText,
+  Shield,
+  User
 } from 'lucide-react';
 
 type Tool = {
@@ -27,6 +29,22 @@ type Tool = {
 };
 
 const tools: Tool[] = [
+  {
+    id: 'ai-detector',
+    title: 'AI Detector',
+    description: 'Detect if text was written by AI or a human',
+    icon: <Shield className="w-5 h-5" />,
+    linkTo: '/dashboard',
+    prompt: ''
+  },
+  {
+    id: 'ai-humanizer',
+    title: 'AI Humanizer',
+    description: 'Make AI-generated text read more like human writing',
+    icon: <User className="w-5 h-5" />,
+    linkTo: '/dashboard',
+    prompt: ''
+  },
   {
     id: 'summarize',
     title: 'Summarize',
