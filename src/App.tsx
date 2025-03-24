@@ -28,6 +28,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/account" element={<Account />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/products" element={<Dashboard />} />
             <Route path="/subscription-success" element={<SubscriptionSuccess />} />
             <Route path="/literature-review" element={<LiteratureReview />} />
             <Route path="*" element={<NotFound />} />
