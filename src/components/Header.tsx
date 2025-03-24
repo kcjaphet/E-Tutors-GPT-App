@@ -24,9 +24,11 @@ const Header: React.FC = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center gap-2">
-            <span className="text-xl font-semibold tracking-tight">
-              GPTTextTools
-            </span>
+            <img 
+              src="/lovable-uploads/8a8980a6-d9dd-403a-83d0-5c0b142b0f6e.png" 
+              alt="e-tutors logo" 
+              className="h-8" 
+            />
           </NavLink>
           
           <nav className="hidden md:flex items-center gap-6">
