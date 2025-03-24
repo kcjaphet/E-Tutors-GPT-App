@@ -10,7 +10,7 @@ import {
   updateProfile
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AuthContextType {
   currentUser: User | null;

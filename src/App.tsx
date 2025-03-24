@@ -15,7 +15,6 @@ import NotFound from '@/pages/NotFound';
 import LiteratureReview from '@/pages/LiteratureReview';
 
 function App() {
-  
   return (
     <AuthProvider>
       <Router>
