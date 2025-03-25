@@ -27,7 +27,7 @@ const Hero: React.FC = () => {
             </div>
             
             <h1 className="animate-in stagger-2 text-4xl md:text-6xl font-semibold leading-tight md:leading-tight text-slate-800 dark:text-white">
-              Transform your text with <br />AI-powered precision
+              AI or Human? Instantly Detect & Humanize AI-Generated Text!
             </h1>
             
             <p className="animate-in stagger-3 text-xl text-slate-700 dark:text-slate-200 max-w-2xl mx-auto">
