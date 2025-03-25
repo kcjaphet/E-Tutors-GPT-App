@@ -26,15 +26,15 @@ const Hero: React.FC = () => {
               </span>
             </div>
             
-            <h1 className="animate-in stagger-2 text-4xl md:text-6xl font-semibold leading-tight md:leading-tight text-slate-800 dark:text-white">
+            <h1 className="animate-in stagger-2 text-4xl md:text-6xl font-semibold leading-tight md:leading-tight text-white shadow-sm">
               AI or Human? Instantly Detect & Humanize AI-Generated Text!
             </h1>
             
-            <h2 className="animate-in stagger-3 text-2xl md:text-3xl font-medium text-slate-700 dark:text-slate-300 mt-2">
+            <h2 className="animate-in stagger-3 text-2xl md:text-3xl font-medium text-white mt-2 shadow-sm">
               Upload, Analyze & Summarize PDFs in Seconds—Powered by AI!
             </h2>
             
-            <p className="animate-in stagger-3 text-xl text-slate-700 dark:text-slate-200 max-w-2xl mx-auto mt-4">
+            <p className="animate-in stagger-3 text-xl text-white/90 max-w-2xl mx-auto mt-4">
               GPTTextTools leverages AI to help you summarize, paraphrase, translate, and enhance your text. Effortlessly powerful, elegantly simple.
             </p>
           </div>
