@@ -145,4 +145,18 @@
   .stagger-3 { animation-delay: 0.3s; }
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
+  
+  /* Add fade-in keyframes */
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  
+  /* Add new futuristic grid style for the hero background */
+  .futuristic-grid {
+    background-size: 50px 50px;
+    background-image: 
+      linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+  }
 }
