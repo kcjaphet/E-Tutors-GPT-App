@@ -6,15 +6,15 @@ import { Link } from 'react-router-dom';
 const Hero: React.FC = () => {
   return (
     <section className="relative">
-      {/* Background image with light blue overlay */}
+      {/* Background image with original overlay */}
       <div className="absolute inset-0 bg-cover bg-center z-0" 
         style={{ 
           backgroundImage: 'url("/lovable-uploads/10da7e32-4a13-448d-a612-a8db0ca0a5fb.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}>
-        {/* Lighter overlay */}
-        <div className="absolute inset-0 bg-blue-100/60 dark:bg-blue-900/40 backdrop-blur-sm"></div>
+        {/* Original overlay */}
+        <div className="absolute inset-0 bg-blue-500/40 backdrop-blur-sm"></div>
       </div>
       
       <div className="container relative z-10 px-4 py-24 md:py-32">
