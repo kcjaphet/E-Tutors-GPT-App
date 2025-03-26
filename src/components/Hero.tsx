@@ -9,12 +9,12 @@ const Hero: React.FC = () => {
       {/* Background image with overlay */}
       <div className="absolute inset-0 bg-cover bg-center z-0" 
         style={{ 
-          backgroundImage: 'url("/lovable-uploads/e7fcffae-75ac-4017-9e73-ee50e5b84d64.png")',
+          backgroundImage: 'url("/lovable-uploads/16b88d5e-ce1d-4c36-a741-c2ec3ced06e9.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}>
         {/* Overlay to enhance text readability */}
-        <div className="absolute inset-0 bg-blue-900/10 backdrop-blur-sm"></div>
+        <div className="absolute inset-0 bg-blue-900/20 backdrop-blur-sm"></div>
       </div>
       
       <div className="container relative z-10 px-4 py-24 md:py-32">
