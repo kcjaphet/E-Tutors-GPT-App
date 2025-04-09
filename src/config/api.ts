@@ -18,3 +18,5 @@ export const FEATURES_CONFIG = {
   // Enable or disable features based on environment variables
   USE_GPTZERO: import.meta.env.VITE_USE_GPTZERO === 'true',
 };
+
+console.log('API configured with base URL:', API_BASE_URL);

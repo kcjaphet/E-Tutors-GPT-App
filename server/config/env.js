@@ -28,6 +28,9 @@ const loadEnv = () => {
   
   if (missingVars.length > 0) {
     console.warn(`Warning: Missing required environment variables: ${missingVars.join(', ')}`);
+    console.warn('Make sure to set these before using the API in production mode.');
+  } else {
+    console.log('All required environment variables are set');
   }
 };
 
