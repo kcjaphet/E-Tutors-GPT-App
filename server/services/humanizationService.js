@@ -1,5 +1,5 @@
 
-const OpenAI = require('openai');
+const { OpenAI } = require('openai');
 const DetectionResult = require('../models/DetectionResult');
 
 // Initialize OpenAI with API key

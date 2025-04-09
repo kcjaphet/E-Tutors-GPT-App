@@ -1,14 +1,15 @@
+
 const express = require('express');
 const router = express.Router();
-const { Configuration, OpenAI } = require('openai');
+const { OpenAI } = require('openai');
 
 // Import the checkSubscription middleware
 const checkSubscription = require('../middleware/checkSubscription');
 
-const configuration = new Configuration({
+// Initialize OpenAI with API key
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAI(configuration);
 
 /**
  * @route   POST /api/humanize-text
@@ -26,19 +27,24 @@ router.post('/humanize-text', checkSubscription, async (req, res) => {
       });
     }
 
-    const prompt = `Please rewrite the following text to sound more natural and human-like:\n\n${text}\n\nRewritten Text:`;
-
-    const aiResponse = await openai.completions.create({
-      model: 'gpt-3.5-turbo-instruct',
-      prompt: prompt,
-      max_tokens: 200,
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are an assistant that rewrites text to sound more natural and human-like. Maintain the original meaning but make the text flow better, use varied sentence structures, and eliminate patterns typical of AI-generated content."
+        },
+        {
+          role: "user",
+          content: `Rewrite the following text to sound more human-like and natural: \n\n${text}`
+        }
+      ],
       temperature: 0.7,
-      n: 1,
-      stop: null,
+      max_tokens: 1000,
     });
 
-    if (!aiResponse.choices || aiResponse.choices.length === 0) {
-      console.error('OpenAI API Error:', aiResponse);
+    if (!response.choices || response.choices.length === 0) {
+      console.error('OpenAI API Error:', response);
       return res.status(500).json({
         success: false,
         message: 'Failed to humanize text',
@@ -46,7 +52,7 @@ router.post('/humanize-text', checkSubscription, async (req, res) => {
       });
     }
 
-    const humanizedText = aiResponse.choices[0].text.trim();
+    const humanizedText = response.choices[0].message.content.trim();
 
     // Check if the humanized text is the same as the original text
     if (humanizedText === text.trim()) {
