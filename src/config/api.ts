@@ -12,3 +12,9 @@ export const API_ENDPOINTS = {
   HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
   LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
 };
+
+// Configuration for optional features
+export const FEATURES_CONFIG = {
+  // Enable or disable features based on environment variables
+  USE_GPTZERO: import.meta.env.VITE_USE_GPTZERO === 'true',
+};

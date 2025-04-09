@@ -1,7 +1,7 @@
 
 const express = require('express');
 const cors = require('cors');
-const dotenv = require('dotenv');
+const { loadEnv } = require('./config/env');
 const connectDB = require('./config/db');
 const detectRoutes = require('./routes/detect');
 const humanizeRoutes = require('./routes/humanize');
@@ -9,7 +9,7 @@ const paymentRoutes = require('./routes/payment');
 const webhookRoutes = require('./routes/webhook');
 
 // Load environment variables
-dotenv.config();
+loadEnv();
 
 // Connect to MongoDB
 connectDB();
@@ -18,7 +18,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 // Special handling for Stripe webhooks (needs raw body)
 app.use('/api/webhook', webhookRoutes);
