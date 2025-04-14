@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -49,8 +48,8 @@ const Pricing: React.FC = () => {
       id: 'monthly',
       name: 'Pro Monthly',
       description: 'Full access on a monthly billing cycle',
-      price: '$20',
-      priceDetail: 'per month',
+      price: '$11.99', // Updated price
+      priceDetail: 'per month, billed yearly', // Updated price detail
       featured: true,
       features: [
         { title: 'AI Text Detection', included: true, detail: 'Unlimited' },
@@ -64,8 +63,8 @@ const Pricing: React.FC = () => {
       id: 'yearly',
       name: 'Pro Yearly',
       description: 'Our best value plan, save over 50%',
-      price: '$100',
-      priceDetail: 'per year',
+      price: '$8.99', // Updated price
+      priceDetail: 'per month, billed yearly', // Updated price detail
       features: [
         { title: 'AI Text Detection', included: true, detail: 'Unlimited' },
         { title: 'Text Humanization', included: true, detail: 'Unlimited' },
