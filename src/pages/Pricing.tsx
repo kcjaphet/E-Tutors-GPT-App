@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -45,11 +46,11 @@ const Pricing: React.FC = () => {
       ],
     },
     {
-      id: 'monthly',
-      name: 'Pro Monthly',
-      description: 'Full access on a monthly billing cycle',
-      price: '$11.99', // Updated price
-      priceDetail: 'per month, billed yearly', // Updated price detail
+      id: 'premium',
+      name: 'Premium',
+      description: 'Our best value plan with all features',
+      price: '$8.99',
+      priceDetail: 'per month, billed yearly',
       featured: true,
       features: [
         { title: 'AI Text Detection', included: true, detail: 'Unlimited' },
@@ -60,11 +61,11 @@ const Pricing: React.FC = () => {
       ],
     },
     {
-      id: 'yearly',
-      name: 'Pro Yearly',
-      description: 'Our best value plan, save over 50%',
-      price: '$8.99', // Updated price
-      priceDetail: 'per month, billed yearly', // Updated price detail
+      id: 'pro',
+      name: 'Pro',
+      description: 'Full access on a monthly billing cycle',
+      price: '$11.99',
+      priceDetail: 'per month',
       features: [
         { title: 'AI Text Detection', included: true, detail: 'Unlimited' },
         { title: 'Text Humanization', included: true, detail: 'Unlimited' },
@@ -170,8 +171,8 @@ const Pricing: React.FC = () => {
               <TableRow>
                 <TableHead className="w-1/3">Feature</TableHead>
                 <TableHead>Free Plan</TableHead>
-                <TableHead>Pro Monthly</TableHead>
-                <TableHead>Pro Yearly</TableHead>
+                <TableHead>Premium</TableHead>
+                <TableHead>Pro</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -222,8 +223,8 @@ const Pricing: React.FC = () => {
               <TableRow>
                 <TableCell className="font-medium">Price</TableCell>
                 <TableCell>$0</TableCell>
-                <TableCell>$20/month</TableCell>
-                <TableCell>$100/year ($8.33/month)</TableCell>
+                <TableCell>$8.99/month (billed yearly)</TableCell>
+                <TableCell>$11.99/month</TableCell>
               </TableRow>
             </TableBody>
           </Table>
