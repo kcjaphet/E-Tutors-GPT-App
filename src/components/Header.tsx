@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
@@ -59,15 +58,6 @@ const Header: React.FC = () => {
               )}
             >
               Pricing
-            </NavLink>
-            <NavLink 
-              to="/about" 
-              className={({isActive}) => cn(
-                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
-                isActive ? "text-primary font-medium" : "text-muted-foreground"
-              )}
-            >
-              About
             </NavLink>
           </nav>
         </div>
