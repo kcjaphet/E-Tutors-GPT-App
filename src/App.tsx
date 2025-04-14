@@ -10,6 +10,7 @@ import ForgotPassword from '@/pages/ForgotPassword';
 import Dashboard from '@/pages/Dashboard';
 import Account from '@/pages/Account';
 import Pricing from '@/pages/Pricing';
+import Products from '@/pages/Products';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import NotFound from '@/pages/NotFound';
 import LiteratureReview from '@/pages/LiteratureReview';
@@ -28,7 +29,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/account" element={<Account />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/products" element={<Dashboard />} />
+            <Route path="/products" element={<Products />} />
             <Route path="/subscription-success" element={<SubscriptionSuccess />} />
             <Route path="/literature-review" element={<LiteratureReview />} />
             <Route path="*" element={<NotFound />} />
