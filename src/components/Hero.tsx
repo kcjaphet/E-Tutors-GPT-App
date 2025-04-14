@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -7,25 +6,28 @@ const Hero: React.FC = () => {
   return (
     <section className="relative bg-gradient-to-b from-primary/10 to-background">
       <div className="container relative z-10 px-4 py-24 md:py-32">
-        <div className="flex flex-col items-center text-center space-y-10">
-          <div className="space-y-4 max-w-3xl">
-            <div className="inline-block">
-              <span className="inline-flex animate-in stagger-1 items-center rounded-full bg-primary/20 px-3 py-1 text-sm font-medium text-primary shadow-sm backdrop-blur-sm">
-                Intelligent Text Processing
-              </span>
-            </div>
+        <div className="flex flex-col items-center text-center space-y-12">
+          {/* Main Tagline */}
+          <div className="space-y-6 max-w-4xl">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white"
+            >
+              Smart Tools for Smarter Content: 
+              <br />
+              Detect, Humanize, and Summarize with Ease.
+            </motion.h1>
             
-            <h1 className="animate-in stagger-2 text-4xl md:text-6xl font-semibold leading-tight md:leading-tight">
-              AI or Human? Instantly Detect & Humanize AI-Generated Text!
-            </h1>
-            
-            <h2 className="animate-in stagger-3 text-2xl md:text-3xl font-medium mt-2">
-              Upload, Analyze & Summarize PDFs in Seconds—Powered by AI!
-            </h2>
-            
-            <p className="animate-in stagger-3 text-xl text-muted-foreground max-w-2xl mx-auto mt-4">
-              GPTTextTools leverages AI to help you summarize, paraphrase, translate, and enhance your text. Effortlessly powerful, elegantly simple.
-            </p>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-2xl md:text-3xl font-semibold text-primary/80 mt-4"
+            >
+              Pass Any AI Detector. Sound 100% Human.
+            </motion.h2>
           </div>
           
           <div className="animate-in stagger-4 flex flex-col sm:flex-row gap-4">
