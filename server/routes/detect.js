@@ -1,64 +1,89 @@
+
 const express = require('express');
 const router = express.Router();
-const { Configuration, OpenAIApi } = require("openai");
-const { GPTZeroAPI } = require("gptzero");
+const { OpenAI } = require("openai");
 
 // Import the checkSubscription middleware
 const checkSubscription = require('../middleware/checkSubscription');
 
 // Initialize OpenAI API
-const configuration = new Configuration({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-const openai = new OpenAIApi(configuration);
-
-// Initialize GPTZero API
-const gptZeroClient = new GPTZeroAPI(process.env.GPTZERO_API_KEY);
 
 /**
  * @route   POST /api/detect-ai-text
- * @desc    Detect if text is AI-generated using GPTZero and OpenAI
+ * @desc    Detect if text is AI-generated using OpenAI
  * @access  Public
  */
 router.post('/detect-ai-text', checkSubscription, async (req, res) => {
   try {
     const { text } = req.body;
 
-    // GPTZero API call
-    const gptZeroOutput = await gptZeroClient.detectText(text);
-    const gptZeroData = gptZeroOutput.completely_ai_generated;
+    if (!text) {
+      return res.status(400).json({
+        success: false,
+        message: 'No text provided'
+      });
+    }
 
     // OpenAI Moderation API call
-    const openaiResponse = await openai.createModeration({
+    const openaiResponse = await openai.moderations.create({
       input: text,
     });
 
     // Determine if text is flagged by OpenAI
-    const isFlagged = openaiResponse.data.results[0].flagged;
+    const moderation = openaiResponse.results[0];
+    const isFlagged = moderation.flagged;
 
-    // Combine results and determine overall AI probability
-    let aiProbability = 0;
-    if (gptZeroData) {
-      aiProbability += 70; // GPTZero indicates high probability
+    // Use OpenAI to analyze the text
+    const analyzeResponse = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI detection system. Analyze the following text and determine the probability it was written by AI. Return only a number between 0 and 100 representing the percentage likelihood it was AI-generated."
+        },
+        {
+          role: "user",
+          content: text
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 10,
+    });
+
+    // Extract AI probability from response
+    let aiProbability = 50; // Default value
+    try {
+      const probText = analyzeResponse.choices[0].message.content.trim();
+      // Extract number from the response
+      const match = probText.match(/\d+/);
+      if (match) {
+        aiProbability = parseFloat(match[0]);
+      }
+    } catch (parseError) {
+      console.error('Error parsing AI probability:', parseError);
     }
+
+    // If text is flagged by OpenAI moderation, increase the probability
     if (isFlagged) {
-      aiProbability += 30; // OpenAI flagged the text
+      aiProbability = Math.min(100, aiProbability + 20);
     }
 
     // Determine confidence level
     let confidenceLevel = 'Low';
-    if (aiProbability > 30 && aiProbability <= 60) {
+    if (aiProbability > 30 && aiProbability <= 70) {
       confidenceLevel = 'Medium';
-    } else if (aiProbability > 60) {
+    } else if (aiProbability > 70) {
       confidenceLevel = 'High';
     }
 
     // Generate analysis
     let analysis = 'The text appears to be human-written.';
-    if (aiProbability > 30) {
+    if (aiProbability > 30 && aiProbability <= 70) {
       analysis = 'The text may contain AI-generated content.';
-    }
-    if (aiProbability > 60) {
+    } else if (aiProbability > 70) {
       analysis = 'The text is likely AI-generated.';
     }
 
