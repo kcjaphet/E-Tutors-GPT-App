@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_BASE_URL } from '@/config/api';
 
 export interface Subscription {
   planType: string;
@@ -25,7 +26,7 @@ export const useSubscription = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/subscription/${currentUser.uid}`);
+      const response = await fetch(`${API_BASE_URL}/api/subscription/${currentUser.uid}`);
       const data = await response.json();
       
       if (data.success) {

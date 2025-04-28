@@ -1,7 +1,7 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Subscription } from './useSubscription';
+import { API_BASE_URL } from '@/config/api';
 
 export interface DetectionResult {
   aiProbability: number;
@@ -85,7 +85,7 @@ export const useTextOperations = (
     setHumanizationResult(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/detect-ai-text', {
+      const response = await fetch(`${API_BASE_URL}/api/detect-ai-text`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ ${responseData.data.analysis}
     setHumanizationResult(null);
     
     try {
-      const response = await fetch('http://localhost:5000/api/humanize-text', {
+      const response = await fetch(`${API_BASE_URL}/api/humanize-text`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
