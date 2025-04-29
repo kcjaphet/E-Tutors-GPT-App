@@ -19,4 +19,5 @@ export const FEATURES_CONFIG = {
   USE_GPTZERO: import.meta.env.VITE_USE_GPTZERO === 'true',
 };
 
+// Log API URL for debugging purposes
 console.log('API configured with base URL:', API_BASE_URL);
