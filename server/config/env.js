@@ -29,6 +29,11 @@ const loadEnv = () => {
   if (missingVars.length > 0) {
     console.warn(`Warning: Missing required environment variables: ${missingVars.join(', ')}`);
     console.warn('Make sure to set these before using the API in production mode.');
+    // Set default MongoDB URI if it's missing
+    if (missingVars.includes('MONGO_URI')) {
+      process.env.MONGO_URI = 'mongodb+srv://etutorsDB_admin:mymama123%40@cluster0.yoxj8bn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+      console.log('Using default MongoDB URI');
+    }
   } else {
     console.log('All required environment variables are set');
   }
