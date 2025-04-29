@@ -5,7 +5,7 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyD4VMEeHKlSz5GbIDSFqK9QG__rEJZI_Ww",
+  apiKey: "AIzaSyBsFajLYXxEYRTx6C-5BVWGLv28E-RN61Y",
   authDomain: "gpttexttools.firebaseapp.com",
   projectId: "gpttexttools",
   storageBucket: "gpttexttools.appspot.com",
