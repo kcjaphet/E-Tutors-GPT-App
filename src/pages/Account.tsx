@@ -1,108 +1,81 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { API_BASE_URL } from '@/config/api';
 
 const Account = () => {
-  const { currentUser, logout } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const [loading, setLoading] = useState(false);
-  const [displayName, setDisplayName] = useState('');
+  const { currentUser, updateEmail, updatePassword, deleteAccount } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!currentUser) {
-      navigate('/login');
-      return;
+    if (currentUser) {
+      setEmail(currentUser.email || '');
     }
+  }, [currentUser]);
 
-    // Initialize form with current user data
-    setEmail(currentUser.email || '');
-    setDisplayName(currentUser.displayName || '');
-  }, [currentUser, navigate]);
-
-  const handleProfileUpdate = async (e: React.FormEvent) => {
+  const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!currentUser) return;
+    if (!email || email === currentUser?.email) return;
     
-    setLoading(true);
     try {
-      // In a real implementation, you would:
-      // 1. Call an API endpoint to update the user profile
-      // 2. Update the local user state
-      
+      setLoading(true);
+      await updateEmail(email);
       toast({
-        title: "Profile updated",
-        description: "Your profile information has been updated successfully."
+        title: "Email updated",
+        description: "Your email has been successfully updated."
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Failed to update email:', error);
       toast({
         variant: "destructive",
         title: "Update failed",
-        description: error.message
+        description: error instanceof Error ? error.message : "Failed to update email"
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!currentUser) return;
+    if (!password) return;
     
-    // Password validation
-    if (newPassword !== confirmPassword) {
+    if (password !== confirmPassword) {
       toast({
         variant: "destructive",
         title: "Passwords don't match",
-        description: "Please make sure your new password and confirmation match."
+        description: "Please make sure your passwords match."
       });
       return;
     }
     
-    if (newPassword.length < 6) {
-      toast({
-        variant: "destructive",
-        title: "Password too short",
-        description: "Your password must be at least 6 characters long."
-      });
-      return;
-    }
-    
-    setLoading(true);
     try {
-      // In a real implementation, you would:
-      // 1. Call an API endpoint to update the password
-      // 2. Consider requiring the current password for verification
-      
-      // Clear password fields
+      setLoading(true);
+      await updatePassword(password);
       setPassword('');
-      setNewPassword('');
       setConfirmPassword('');
-      
       toast({
         title: "Password updated",
-        description: "Your password has been changed successfully."
+        description: "Your password has been successfully updated."
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Failed to update password:', error);
       toast({
         variant: "destructive",
         title: "Update failed",
-        description: error.message
+        description: error instanceof Error ? error.message : "Failed to update password"
       });
     } finally {
       setLoading(false);
@@ -110,219 +83,180 @@ const Account = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!currentUser) return;
-    
-    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+    if (deleteConfirm !== 'DELETE') {
+      toast({
+        variant: "destructive",
+        title: "Confirmation required",
+        description: "Please type DELETE to confirm account deletion."
+      });
       return;
     }
     
-    setLoading(true);
     try {
-      // In a real implementation, you would:
-      // 1. Call an API endpoint to delete the user account
-      // 2. Log the user out
-      
-      await logout();
-      navigate('/');
-      
+      setLoading(true);
+      await deleteAccount();
       toast({
         title: "Account deleted",
-        description: "Your account has been deleted successfully."
+        description: "Your account has been successfully deleted."
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Failed to delete account:', error);
       toast({
         variant: "destructive",
         title: "Delete failed",
-        description: error.message
+        description: error instanceof Error ? error.message : "Failed to delete your account"
       });
       setLoading(false);
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigate('/');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Logout failed",
-        description: error.message
-      });
-    }
-  };
-
+  
+  // Redirect if not signed in
   if (!currentUser) {
-    return null; // User not logged in, will be redirected in useEffect
+    return <Navigate to="/login" />;
   }
 
-  // Format the creation date or use a default
-  const createdDate = currentUser.createdAt 
-    ? new Date(currentUser.createdAt).toLocaleDateString() 
-    : 'Unknown date';
-
   return (
-    <div className="container max-w-4xl py-10">
-      <h1 className="text-3xl font-bold mb-6">Account Settings</h1>
+    <div className="flex flex-col min-h-screen">
+      <Header />
       
-      <Tabs defaultValue="profile" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>Update your account details and personal information.</CardDescription>
-            </CardHeader>
-            <form onSubmit={handleProfileUpdate}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
-                  <Input
-                    id="displayName"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your display name"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Your email"
-                    disabled
-                  />
-                  <p className="text-sm text-muted-foreground">You cannot change your email address.</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    Account created on: {createdDate}
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" type="button" onClick={handleLogout}>
-                  Log out
-                </Button>
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Saving..." : "Save changes"}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="security">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Update your password and security preferences.</CardDescription>
-            </CardHeader>
-            <form onSubmit={handlePasswordChange}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Current Password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Your current password"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Your new password"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm new password"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" type="button" onClick={() => {
-                  setPassword('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={loading || !password || !newPassword || !confirmPassword}>
-                  {loading ? "Updating..." : "Update password"}
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
+      <main className="flex-1 container px-4 py-12">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8">Account Settings</h1>
           
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle>Delete Account</CardTitle>
-              <CardDescription>Permanently delete your account and all your data.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Once you delete your account, there is no going back. All your data will be permanently removed.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="destructive" onClick={handleDeleteAccount} disabled={loading}>
-                {loading ? "Processing..." : "Delete Account"}
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="subscription">
-          <Card>
-            <CardHeader>
-              <CardTitle>Subscription Status</CardTitle>
-              <CardDescription>Manage your subscription and billing information.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
+          <div className="space-y-8">
+            {/* Account Info Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Information</CardTitle>
+                <CardDescription>View your account details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-2">
                 <div>
-                  <h3 className="font-medium">Current Plan</h3>
-                  <p className="text-sm text-muted-foreground">
-                    You are currently on the Free plan.
+                  <p className="text-sm font-medium">Email</p>
+                  <p className="text-muted-foreground">{currentUser.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Account Created</p>
+                  <p className="text-muted-foreground">
+                    {currentUser.metadata && new Date(parseInt(currentUser.metadata.creationTime)).toLocaleDateString()}
                   </p>
                 </div>
-                
                 <div>
-                  <h3 className="font-medium">Usage This Month</h3>
-                  <ul className="text-sm text-muted-foreground">
-                    <li>AI Text Detection: 0/5 uses</li>
-                    <li>Text Humanization: 0/3 uses</li>
-                  </ul>
+                  <p className="text-sm font-medium">Last Sign In</p>
+                  <p className="text-muted-foreground">
+                    {currentUser.metadata && new Date(parseInt(currentUser.metadata.lastSignInTime)).toLocaleDateString()}
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={() => navigate('/pricing')}>
-                Upgrade Your Plan
-              </Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              </CardContent>
+            </Card>
+            
+            {/* Update Email Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Update Email</CardTitle>
+                <CardDescription>Change the email address associated with your account</CardDescription>
+              </CardHeader>
+              <form onSubmit={handleEmailUpdate}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium">New Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" disabled={loading || email === currentUser.email}>
+                    {loading ? 'Updating...' : 'Update Email'}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+            
+            {/* Update Password Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Update Password</CardTitle>
+                <CardDescription>Change your account password</CardDescription>
+              </CardHeader>
+              <form onSubmit={handlePasswordUpdate}>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="password" className="text-sm font-medium">New Password</label>
+                    <input
+                      type="password"
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm New Password</label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button type="submit" disabled={loading || !password || password !== confirmPassword}>
+                    {loading ? 'Updating...' : 'Update Password'}
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+            
+            {/* Delete Account Card */}
+            <Card className="border-destructive/50">
+              <CardHeader className="text-destructive">
+                <CardTitle>Delete Account</CardTitle>
+                <CardDescription className="text-destructive/80">
+                  Permanently delete your account and all your data
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm">
+                  This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+                </p>
+                <div className="space-y-2">
+                  <label htmlFor="deleteConfirm" className="text-sm font-medium">Type DELETE to confirm</label>
+                  <input
+                    type="text"
+                    id="deleteConfirm"
+                    value={deleteConfirm}
+                    onChange={(e) => setDeleteConfirm(e.target.value)}
+                    className="w-full p-2 border rounded-md border-destructive/50"
+                  />
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  variant="destructive" 
+                  disabled={loading || deleteConfirm !== 'DELETE'} 
+                  onClick={handleDeleteAccount}
+                >
+                  {loading ? 'Deleting...' : 'Delete Account'}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 };
