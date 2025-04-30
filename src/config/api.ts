@@ -11,6 +11,11 @@ export const API_ENDPOINTS = {
   DETECT_AI_TEXT: `${API_BASE_URL}/api/detect-ai-text`,
   HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
   LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
+  AUTH: {
+    SIGNUP: `${API_BASE_URL}/api/auth/signup`,
+    LOGIN: `${API_BASE_URL}/api/auth/login`,
+    RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
+  }
 };
 
 // Configuration for optional features

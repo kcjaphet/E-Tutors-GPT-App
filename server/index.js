@@ -7,6 +7,7 @@ const detectRoutes = require('./routes/detect');
 const humanizeRoutes = require('./routes/humanize');
 const paymentRoutes = require('./routes/payment');
 const webhookRoutes = require('./routes/webhook');
+const authRoutes = require('./routes/auth');
 
 // Load environment variables
 loadEnv();
@@ -34,6 +35,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api', detectRoutes);
 app.use('/api', humanizeRoutes);
 app.use('/api', paymentRoutes);
+app.use('/api/auth', authRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
