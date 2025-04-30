@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -155,6 +156,7 @@ const Account = () => {
     return null; // User not logged in, will be redirected in useEffect
   }
 
+  // Format the creation date or use a default
   const createdDate = currentUser.createdAt 
     ? new Date(currentUser.createdAt).toLocaleDateString() 
     : 'Unknown date';

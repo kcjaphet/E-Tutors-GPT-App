@@ -8,6 +8,7 @@ const humanizeRoutes = require('./routes/humanize');
 const paymentRoutes = require('./routes/payment');
 const webhookRoutes = require('./routes/webhook');
 const authRoutes = require('./routes/auth');
+const textToolsRoutes = require('./routes/textTools');
 
 // Load environment variables
 loadEnv();
@@ -36,6 +37,7 @@ app.use('/api', detectRoutes);
 app.use('/api', humanizeRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', textToolsRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {

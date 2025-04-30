@@ -1,18 +1,19 @@
+
 import React, { useState } from 'react';
 import ToolCard from './ToolCard';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { API_BASE_URL, API_ENDPOINTS } from '@/config/api';
 
 // Icons
 import {
   MessageSquare,
   Languages,
   FileText,
-  Highlighter,
   Pencil,
   Wand2,
   RefreshCw,
-  ArrowUp,
   Check,
   BookText,
   Shield,
@@ -104,6 +105,7 @@ const TextTools: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [language, setLanguage] = useState<string>('Spanish');
   const [tone, setTone] = useState<string>('professional');
+  const { toast } = useToast();
 
   const handleToolSelect = (toolId: string) => {
     const tool = tools.find(t => t.id === toolId);
@@ -124,40 +126,53 @@ const TextTools: React.FC = () => {
     
     setIsProcessing(true);
     
-    // Simulate API call with timeout
-    setTimeout(() => {
-      // In a real implementation, this would be an API call to your backend
-      const tool = tools.find(t => t.id === selectedTool);
-      let result = '';
+    try {
+      // Prepare options based on the selected tool
+      let options = {};
       
-      if (tool) {
-        switch (selectedTool) {
-          case 'summarize':
-            result = `This is a summarized version of your text. It's designed to be concise while retaining the key points of the original passage.`;
-            break;
-          case 'paraphrase':
-            result = `This is a paraphrased version of your text. The meaning remains the same, but the words and structure have been changed.`;
-            break;
-          case 'translate':
-            result = `This is your text translated to ${language}. In a real implementation, this would be an actual translation.`;
-            break;
-          case 'grammar':
-            result = `This is your text with grammar errors corrected. Any grammatical issues in the original text have been fixed.`;
-            break;
-          case 'tone':
-            result = `This is your text with the tone adjusted to be more ${tone}. The content is the same, but the way it's expressed has been modified.`;
-            break;
-          case 'enhance':
-            result = `This is an enhanced version of your text. It's more professional, clear, and effective than the original.`;
-            break;
-          default:
-            result = 'Tool not implemented yet.';
-        }
+      if (selectedTool === 'translate') {
+        options = { language };
+      } else if (selectedTool === 'tone') {
+        options = { tone };
       }
       
-      setOutputText(result);
+      // Make API call
+      const response = await fetch(API_ENDPOINTS.TEXT_PROCESS, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: inputText,
+          operation: selectedTool,
+          options
+        }),
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to process text');
+      }
+      
+      // Set the processed text
+      setOutputText(responseData.data.processedText);
+      
+      toast({
+        title: "Processing complete",
+        description: `Your text has been successfully ${selectedTool}d`
+      });
+      
+    } catch (error) {
+      console.error('Error processing text:', error);
+      toast({
+        variant: "destructive",
+        title: "Processing failed",
+        description: error instanceof Error ? error.message : "An unknown error occurred"
+      });
+    } finally {
       setIsProcessing(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -290,6 +305,10 @@ const TextTools: React.FC = () => {
                   className="inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 text-xs font-medium shadow-sm transition-colors hover:bg-secondary focus-ring"
                   onClick={() => {
                     navigator.clipboard.writeText(outputText);
+                    toast({
+                      title: "Copied to clipboard",
+                      description: "The text has been copied to your clipboard"
+                    });
                   }}
                 >
                   <Check className="mr-2 h-3 w-3" />

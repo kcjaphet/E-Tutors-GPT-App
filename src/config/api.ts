@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   DETECT_AI_TEXT: `${API_BASE_URL}/api/detect-ai-text`,
   HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
   LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
+  TEXT_PROCESS: `${API_BASE_URL}/api/text-process`,
   AUTH: {
     SIGNUP: `${API_BASE_URL}/api/auth/signup`,
     LOGIN: `${API_BASE_URL}/api/auth/login`,
