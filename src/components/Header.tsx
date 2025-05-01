@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     }
   };
 
-  // Use absolute URL for the logo to ensure it works in all environments
+  // Use direct path to logo image with proper URL handling for all environments
   const logoPath = "/lovable-uploads/8a8980a6-d9dd-403a-83d0-5c0b142b0f6e.png";
 
   return (
@@ -33,6 +33,11 @@ const Header: React.FC = () => {
               className="h-12" 
               width="48"
               height="48"
+              onError={(e) => {
+                console.error("Logo failed to load, trying fallback");
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "https://api.dicebear.com/6.x/initials/svg?seed=ET";
+              }}
             />
           </NavLink>
           
