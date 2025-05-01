@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -10,13 +10,15 @@ import PricingCard from '@/components/pricing/PricingCard';
 import PricingTable from '@/components/pricing/PricingTable';
 import PricingFAQ from '@/components/pricing/PricingFAQ';
 import { pricingPlans } from '@/data/pricingPlans';
+import { API_BASE_URL } from '@/config/api';
 
 const Pricing: React.FC = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSelectPlan = (planId: string) => {
+  const handleSelectPlan = async (planId: string) => {
     if (!currentUser) {
       toast({
         title: "Authentication required",
@@ -35,8 +37,41 @@ const Pricing: React.FC = () => {
       return;
     }
 
-    // Redirect to the checkout page or initiate checkout
-    navigate(`/account?plan=${planId}`);
+    // For premium or pro plans, call the Stripe checkout API
+    try {
+      setIsLoading(true);
+      
+      const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.uid,
+          planType: planId === 'premium' ? 'yearly' : 'monthly', // premium is yearly, pro is monthly
+          successUrl: `${window.location.origin}/subscription-success`,
+          cancelUrl: `${window.location.origin}/pricing`,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.message || 'Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Checkout Failed",
+        description: error instanceof Error ? error.message : "Failed to start checkout process",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,7 +85,8 @@ const Pricing: React.FC = () => {
             <PricingCard 
               key={plan.id} 
               plan={plan} 
-              onSelect={handleSelectPlan} 
+              onSelect={handleSelectPlan}
+              isLoading={isLoading}
             />
           ))}
         </div>

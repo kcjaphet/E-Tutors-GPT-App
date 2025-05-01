@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sparkles, CheckIcon, XIcon } from 'lucide-react';
+import { Sparkles, CheckIcon, XIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -25,9 +25,10 @@ export interface Plan {
 interface PricingCardProps {
   plan: Plan;
   onSelect: (planId: string) => void;
+  isLoading?: boolean;
 }
 
-const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect }) => {
+const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect, isLoading }) => {
   return (
     <Card 
       className={`flex flex-col ${plan.featured ? 'border-primary shadow-lg' : ''}`}
@@ -70,8 +71,13 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect }) => {
           onClick={() => onSelect(plan.id)}
           className="w-full"
           variant={plan.featured ? "default" : "outline"}
+          disabled={isLoading}
         >
-          {plan.id === 'free' ? 'Get Started' : 'Subscribe'}
+          {isLoading ? (
+            <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
+          ) : (
+            plan.id === 'free' ? 'Get Started' : 'Subscribe'
+          )}
         </Button>
       </CardFooter>
     </Card>

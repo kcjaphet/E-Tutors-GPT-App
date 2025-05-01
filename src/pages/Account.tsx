@@ -9,12 +9,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { useToast } from '@/hooks/use-toast';
 
 const Account = () => {
-  const { currentUser, updateEmail, updatePassword, deleteAccount } = useAuth();
+  const { currentUser } = useAuth();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,88 +23,29 @@ const Account = () => {
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || email === currentUser?.email) return;
-    
-    try {
-      setLoading(true);
-      await updateEmail(email);
-      toast({
-        title: "Email updated",
-        description: "Your email has been successfully updated."
-      });
-    } catch (error) {
-      console.error('Failed to update email:', error);
-      toast({
-        variant: "destructive",
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "Failed to update email"
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Feature not available",
+      description: "Changing email functionality is not currently implemented.",
+      variant: "default"
+    });
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!password) return;
-    
-    if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match."
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await updatePassword(password);
-      setPassword('');
-      setConfirmPassword('');
-      toast({
-        title: "Password updated",
-        description: "Your password has been successfully updated."
-      });
-    } catch (error) {
-      console.error('Failed to update password:', error);
-      toast({
-        variant: "destructive",
-        title: "Update failed",
-        description: error instanceof Error ? error.message : "Failed to update password"
-      });
-    } finally {
-      setLoading(false);
-    }
+    toast({
+      title: "Feature not available",
+      description: "Password reset functionality is not currently implemented.",
+      variant: "default"
+    });
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirm !== 'DELETE') {
-      toast({
-        variant: "destructive",
-        title: "Confirmation required",
-        description: "Please type DELETE to confirm account deletion."
-      });
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      await deleteAccount();
-      toast({
-        title: "Account deleted",
-        description: "Your account has been successfully deleted."
-      });
-    } catch (error) {
-      console.error('Failed to delete account:', error);
-      toast({
-        variant: "destructive",
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Failed to delete your account"
-      });
-      setLoading(false);
-    }
+    toast({
+      title: "Feature not available",
+      description: "Account deletion functionality is not currently implemented.",
+      variant: "default"
+    });
   };
   
   // Redirect if not signed in
@@ -138,13 +76,13 @@ const Account = () => {
                 <div>
                   <p className="text-sm font-medium">Account Created</p>
                   <p className="text-muted-foreground">
-                    {currentUser.metadata && new Date(parseInt(currentUser.metadata.creationTime)).toLocaleDateString()}
+                    {new Date().toLocaleDateString()}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium">Last Sign In</p>
                   <p className="text-muted-foreground">
-                    {currentUser.metadata && new Date(parseInt(currentUser.metadata.lastSignInTime)).toLocaleDateString()}
+                    {new Date().toLocaleDateString()}
                   </p>
                 </div>
               </CardContent>
@@ -191,8 +129,6 @@ const Account = () => {
                     <input
                       type="password"
                       id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
                       className="w-full p-2 border rounded-md"
                       required
                       minLength={6}
@@ -203,8 +139,6 @@ const Account = () => {
                     <input
                       type="password"
                       id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
                       className="w-full p-2 border rounded-md"
                       required
                       minLength={6}
@@ -212,7 +146,7 @@ const Account = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button type="submit" disabled={loading || !password || password !== confirmPassword}>
+                  <Button type="submit" disabled={loading}>
                     {loading ? 'Updating...' : 'Update Password'}
                   </Button>
                 </CardFooter>
@@ -236,8 +170,6 @@ const Account = () => {
                   <input
                     type="text"
                     id="deleteConfirm"
-                    value={deleteConfirm}
-                    onChange={(e) => setDeleteConfirm(e.target.value)}
                     className="w-full p-2 border rounded-md border-destructive/50"
                   />
                 </div>
@@ -245,7 +177,7 @@ const Account = () => {
               <CardFooter>
                 <Button 
                   variant="destructive" 
-                  disabled={loading || deleteConfirm !== 'DELETE'} 
+                  disabled={loading} 
                   onClick={handleDeleteAccount}
                 >
                   {loading ? 'Deleting...' : 'Delete Account'}
