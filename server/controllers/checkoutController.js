@@ -26,7 +26,9 @@ const createCheckoutSession = async (req, res) => {
     let priceId;
     const prices = {
       monthly: process.env.STRIPE_MONTHLY_PRICE_ID,
-      yearly: process.env.STRIPE_YEARLY_PRICE_ID
+      yearly: process.env.STRIPE_YEARLY_PRICE_ID,
+      premium: process.env.STRIPE_YEARLY_PRICE_ID,  // Premium uses yearly pricing
+      pro: process.env.STRIPE_MONTHLY_PRICE_ID      // Pro uses monthly pricing
     };
 
     priceId = prices[planType];

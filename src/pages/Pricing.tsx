@@ -55,7 +55,7 @@ const Pricing: React.FC = () => {
         },
         body: JSON.stringify({
           userId: currentUser.uid,
-          planType: planId === 'premium' ? 'yearly' : 'monthly', // premium is yearly, pro is monthly
+          planType: planId, // Just use the planId directly (premium or pro)
           successUrl: `${window.location.origin}/subscription-success`,
           cancelUrl: `${window.location.origin}/pricing`,
         }),

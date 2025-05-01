@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
@@ -18,15 +19,20 @@ const Header: React.FC = () => {
     }
   };
 
+  // Use absolute URL for the logo to ensure it works in all environments
+  const logoPath = "/lovable-uploads/8a8980a6-d9dd-403a-83d0-5c0b142b0f6e.png";
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/8a8980a6-d9dd-403a-83d0-5c0b142b0f6e.png" 
+              src={logoPath}
               alt="e-tutors logo" 
               className="h-12" 
+              width="48"
+              height="48"
             />
           </NavLink>
           
