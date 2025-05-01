@@ -16,31 +16,38 @@ const Pricing: React.FC = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({
+    free: false,
+    premium: false,
+    pro: false
+  });
 
   const handleSelectPlan = async (planId: string) => {
-    if (!currentUser) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in or sign up to subscribe to a plan",
-        variant: "destructive"
-      });
-      navigate('/login');
-      return;
-    }
-
-    if (planId === 'free') {
-      toast({
-        title: "Free Plan",
-        description: "You're already on the Free Plan!"
-      });
-      return;
-    }
-
-    // For premium or pro plans, call the Stripe checkout API
+    // Set loading for the specific plan
+    setIsLoading(prev => ({ ...prev, [planId]: true }));
+    
     try {
-      setIsLoading(true);
-      
+      if (!currentUser) {
+        toast({
+          title: "Authentication required",
+          description: "Please log in or sign up to subscribe to a plan",
+          variant: "destructive"
+        });
+        navigate('/login');
+        return;
+      }
+
+      if (planId === 'free') {
+        // For free plan, just show a success message and navigate to dashboard
+        toast({
+          title: "Free Plan Activated",
+          description: "You're now on the Free Plan!"
+        });
+        navigate('/dashboard');
+        return;
+      }
+
+      // For premium or pro plans, call the Stripe checkout API
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -70,7 +77,7 @@ const Pricing: React.FC = () => {
         variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsLoading(prev => ({ ...prev, [planId]: false }));
     }
   };
 
@@ -86,7 +93,7 @@ const Pricing: React.FC = () => {
               key={plan.id} 
               plan={plan} 
               onSelect={handleSelectPlan}
-              isLoading={isLoading}
+              isLoading={isLoading[plan.id]}
             />
           ))}
         </div>

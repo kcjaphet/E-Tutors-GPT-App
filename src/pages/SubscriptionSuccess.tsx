@@ -1,7 +1,8 @@
 
 import React, { useEffect } from 'react';
-import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle } from 'lucide-react';
@@ -10,7 +11,14 @@ import Footer from '@/components/Footer';
 
 const SubscriptionSuccess: React.FC = () => {
   const { currentUser } = useAuth();
-  const location = useLocation();
+  const { fetchSubscription } = useSubscription();
+  
+  useEffect(() => {
+    // Refresh subscription data when this page loads
+    if (currentUser) {
+      fetchSubscription();
+    }
+  }, [currentUser, fetchSubscription]);
   
   // If not logged in, redirect to login
   if (!currentUser) {
