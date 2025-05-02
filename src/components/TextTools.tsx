@@ -18,8 +18,8 @@ const TextTools: React.FC = () => {
   const handleToolSelect = (toolId: string) => {
     const tool = tools.find(t => t.id === toolId);
     
-    if (tool?.linkTo) {
-      // If the tool has a link, we don't need to select it
+    if (tool?.linkTo && tool.linkTo !== '') {
+      // If the tool has a non-empty link, we don't need to select it
       return;
     }
     
@@ -68,7 +68,7 @@ const TextTools: React.FC = () => {
       
       toast({
         title: "Processing complete",
-        description: `Your text has been successfully ${selectedTool}d`
+        description: `Your text has been successfully processed`
       });
       
     } catch (error) {

@@ -8,7 +8,7 @@ const ToolsGrid: React.FC<ToolsGridProps> = ({ tools, onToolSelect, selectedTool
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
       {tools.map((tool) => (
-        tool.linkTo ? (
+        tool.linkTo && tool.linkTo !== '' ? (
           <Link to={tool.linkTo} key={tool.id}>
             <ToolCard
               title={tool.title}
