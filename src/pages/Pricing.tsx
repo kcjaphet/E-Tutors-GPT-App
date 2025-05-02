@@ -47,6 +47,8 @@ const Pricing: React.FC = () => {
         return;
       }
 
+      console.log(`Creating checkout session for plan: ${planId}`);
+
       // For premium or pro plans, call the Stripe checkout API
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
@@ -55,7 +57,7 @@ const Pricing: React.FC = () => {
         },
         body: JSON.stringify({
           userId: currentUser.uid,
-          planType: planId, // Just use the planId directly (premium or pro)
+          planType: planId, // premium or pro
           successUrl: `${window.location.origin}/subscription-success`,
           cancelUrl: `${window.location.origin}/pricing`,
         }),
@@ -63,8 +65,15 @@ const Pricing: React.FC = () => {
 
       const data = await response.json();
       
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+      
+      console.log('Checkout session created:', data);
+      
       if (data.success && data.url) {
         // Redirect to Stripe Checkout
+        console.log('Redirecting to:', data.url);
         window.location.href = data.url;
       } else {
         throw new Error(data.message || 'Failed to create checkout session');

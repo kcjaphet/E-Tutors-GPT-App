@@ -24,16 +24,13 @@ const createCheckoutSession = async (req, res) => {
 
     // Determine which price ID to use based on the plan type
     let priceId;
-    const prices = {
-      monthly: process.env.STRIPE_MONTHLY_PRICE_ID,
-      yearly: process.env.STRIPE_YEARLY_PRICE_ID,
-      premium: process.env.STRIPE_YEARLY_PRICE_ID,  // Premium uses yearly pricing
-      pro: process.env.STRIPE_MONTHLY_PRICE_ID      // Pro uses monthly pricing
-    };
-
-    priceId = prices[planType];
-
-    if (!priceId) {
+    
+    // Define price IDs for each plan type
+    if (planType === 'premium') {
+      priceId = process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1RK4maPXnmc0TuP5iUkQnMtc';
+    } else if (planType === 'pro') {
+      priceId = process.env.STRIPE_PRO_PRICE_ID || 'price_1RK4nKPXnmc0TuP5jRHXBzFN';
+    } else {
       return res.status(400).json({
         success: false,
         message: 'Invalid plan type'
@@ -56,7 +53,7 @@ const createCheckoutSession = async (req, res) => {
     }
 
     // Default success URL if not provided
-    const defaultSuccessUrl = `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/subscription-success`;
+    const defaultSuccessUrl = `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/subscription-success`;
 
     // Create the checkout session
     const session = await stripe.checkout.sessions.create({
@@ -70,7 +67,7 @@ const createCheckoutSession = async (req, res) => {
       ],
       mode: 'subscription',
       success_url: successUrl || defaultSuccessUrl,
-      cancel_url: cancelUrl || process.env.STRIPE_CANCEL_URL || `${process.env.CORS_ORIGIN || 'http://localhost:5173'}/pricing`,
+      cancel_url: cancelUrl || process.env.STRIPE_CANCEL_URL || `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/pricing`,
       metadata: {
         userId: userId,
         planType: planType
