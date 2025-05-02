@@ -35,6 +35,7 @@ export const tools: Tool[] = [
     title: 'Summarize',
     description: 'Condense your text into a concise summary',
     icon: <FileText className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Summarize the following text:'
   },
   {
@@ -42,6 +43,7 @@ export const tools: Tool[] = [
     title: 'Paraphrase',
     description: 'Rewrite your text while keeping its meaning',
     icon: <RefreshCw className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Paraphrase the following text:'
   },
   {
@@ -49,6 +51,7 @@ export const tools: Tool[] = [
     title: 'Translate',
     description: 'Translate your text to another language',
     icon: <Languages className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Translate the following text to '
   },
   {
@@ -56,6 +59,7 @@ export const tools: Tool[] = [
     title: 'Fix Grammar',
     description: 'Correct grammatical errors in your text',
     icon: <Pencil className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Fix the grammar in the following text:'
   },
   {
@@ -63,6 +67,7 @@ export const tools: Tool[] = [
     title: 'Adjust Tone',
     description: 'Change the tone of your text',
     icon: <MessageSquare className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Adjust the tone of the following text to be '
   },
   {
@@ -70,6 +75,7 @@ export const tools: Tool[] = [
     title: 'Enhance',
     description: 'Improve the quality of your writing',
     icon: <Wand2 className="w-5 h-5" />,
+    linkTo: '/products',
     prompt: 'Enhance the following text to make it more professional:'
   },
   {
