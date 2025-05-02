@@ -9,6 +9,7 @@ const paymentRoutes = require('./routes/payment');
 const webhookRoutes = require('./routes/webhook');
 const authRoutes = require('./routes/auth');
 const textToolsRoutes = require('./routes/textTools');
+const dbTestRoutes = require('./routes/db-test');
 
 // Load environment variables
 loadEnv();
@@ -38,6 +39,7 @@ app.use('/api', humanizeRoutes);
 app.use('/api', paymentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', textToolsRoutes);
+app.use('/api/db', dbTestRoutes);
 
 // Basic route for testing
 app.get('/', (req, res) => {
