@@ -67,9 +67,10 @@ const Pricing: React.FC = () => {
       }
       
       const data = await response.json();
+      console.log("Checkout response:", data);
       
+      // Important: directly redirect to Stripe checkout URL
       if (data.success && data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         throw new Error('Failed to create checkout session');

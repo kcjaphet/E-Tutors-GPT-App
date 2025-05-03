@@ -40,6 +40,17 @@ const createCheckoutSession = async (req, res) => {
     // Default success URL if not provided
     const defaultSuccessUrl = `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/subscription-success`;
 
+    console.log("Creating checkout session with:", {
+      planType,
+      priceId,
+      successUrl: successUrl || defaultSuccessUrl,
+      cancelUrl: cancelUrl || process.env.STRIPE_CANCEL_URL || `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/pricing`,
+      metadata: {
+        userId,
+        planType
+      }
+    });
+
     // Create a new checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -56,6 +67,11 @@ const createCheckoutSession = async (req, res) => {
         userId: userId,
         planType: planType
       }
+    });
+
+    console.log("Checkout session created:", {
+      sessionId: session.id,
+      url: session.url
     });
 
     return res.json({
