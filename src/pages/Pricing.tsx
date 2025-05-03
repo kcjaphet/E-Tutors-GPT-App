@@ -53,12 +53,6 @@ const Pricing: React.FC = () => {
 
       console.log(`Creating checkout session for plan: ${planId}`);
 
-      // Get Stripe instance from the promise
-      const stripe = await stripePromise;
-      if (!stripe) {
-        throw new Error('Stripe failed to initialize');
-      }
-
       // For premium or pro plans, call the Stripe checkout API
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
@@ -81,18 +75,8 @@ const Pricing: React.FC = () => {
       
       console.log('Checkout session created:', data);
       
-      if (data.success && data.sessionId) {
-        // Use Stripe's redirectToCheckout with the session ID
-        console.log('Redirecting to checkout with session ID:', data.sessionId);
-        const result = await stripe.redirectToCheckout({
-          sessionId: data.sessionId
-        });
-        
-        if (result.error) {
-          throw new Error(result.error.message || 'Failed to redirect to checkout');
-        }
-      } else if (data.success && data.url) {
-        // Fallback to direct URL redirection if sessionId is not provided
+      if (data.success && data.url) {
+        // Redirect directly to the Stripe checkout URL
         console.log('Redirecting to:', data.url);
         window.location.href = data.url;
       } else {

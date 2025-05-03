@@ -1,4 +1,3 @@
-
 const stripe = require('../config/stripe');
 const Subscription = require('../models/Subscription');
 
@@ -37,28 +36,14 @@ const createCheckoutSession = async (req, res) => {
       });
     }
 
-    // Create a new Stripe customer if one doesn't exist
-    let customerId = subscription.stripeCustomerId;
-    
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        metadata: {
-          userId: userId
-        }
-      });
-      
-      customerId = customer.id;
-      subscription.stripeCustomerId = customerId;
-      await subscription.save();
-    }
-
     // Default success URL if not provided
     const defaultSuccessUrl = `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/subscription-success`;
 
-    // Create the checkout session
+    // Create the checkout session without relying on stored customer ID
+    // This ensures we don't encounter issues with deleted/invalid customers
     const session = await stripe.checkout.sessions.create({
-      customer: customerId,
       payment_method_types: ['card'],
+      customer_creation: 'always',
       line_items: [
         {
           price: priceId,
