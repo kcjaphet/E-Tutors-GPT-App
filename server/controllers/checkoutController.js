@@ -25,11 +25,11 @@ const createCheckoutSession = async (req, res) => {
     // Determine which price ID to use based on the plan type
     let priceId;
     
-    // Define price IDs for each plan type
+    // Define price IDs for each plan type using the provided IDs
     if (planType === 'premium') {
-      priceId = process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1RK4maPXnmc0TuP5iUkQnMtc';
+      priceId = process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1RKSWUB6lMlRE8ViKMPsae8l';
     } else if (planType === 'pro') {
-      priceId = process.env.STRIPE_PRO_PRICE_ID || 'price_1RK4nKPXnmc0TuP5jRHXBzFN';
+      priceId = process.env.STRIPE_PRO_PRICE_ID || 'price_1RKSflB6lMlRE8VicFIcfDg8';
     } else {
       return res.status(400).json({
         success: false,

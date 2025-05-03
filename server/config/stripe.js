@@ -1,9 +1,8 @@
 
 const Stripe = require('stripe');
 
-// Initialize Stripe with the API key from environment variables
-// If not available, use the provided test key (for development only)
-const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_51RK4CZPXnmc0TuP5ZTfSMVOnAOamtJdYuxpX4iCtRvcoAHajTa33kfrDGbGbmFjsEfvpXyewWibzEpVm2pFgbTzm00Ao2iCSml';
+// Initialize Stripe with the provided API key
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_51RK2w2B6lMlRE8ViqNqxyTmqTJytPGIgaMYwz0CUUsdxD70GzbFt1FAGBulJZrY9cxE8c5xDjRzeciwqaM5W5o8200JokqEIms';
 
 const stripe = Stripe(stripeSecretKey);
 
