@@ -1,3 +1,4 @@
+
 const stripe = require('../config/stripe');
 const Subscription = require('../models/Subscription');
 
@@ -24,7 +25,7 @@ const createCheckoutSession = async (req, res) => {
     // Determine which price ID to use based on the plan type
     let priceId;
     
-    // Define price IDs for each plan type using the provided IDs
+    // Define price IDs for each plan type
     if (planType === 'premium') {
       priceId = process.env.STRIPE_PREMIUM_PRICE_ID || 'price_1RKSWUB6lMlRE8ViKMPsae8l';
     } else if (planType === 'pro') {
@@ -39,8 +40,7 @@ const createCheckoutSession = async (req, res) => {
     // Default success URL if not provided
     const defaultSuccessUrl = `${process.env.CORS_ORIGIN?.split(',')[0] || 'http://localhost:5173'}/subscription-success`;
 
-    // Create the checkout session without relying on stored customer ID
-    // This ensures we don't encounter issues with deleted/invalid customers
+    // Create a new checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       customer_creation: 'always',

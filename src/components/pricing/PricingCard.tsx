@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Sparkles, CheckIcon, XIcon, Loader2 } from 'lucide-react';
+import { BadgeDollarSign, CheckIcon, XIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -35,7 +35,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect, isLoading }) 
     >
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          {plan.featured && <Sparkles className="h-5 w-5 text-primary" />}
+          {plan.featured && <BadgeDollarSign className="h-5 w-5 text-primary" />}
           {plan.name}
         </CardTitle>
         <CardDescription>{plan.description}</CardDescription>
@@ -76,7 +76,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ plan, onSelect, isLoading }) 
           {isLoading ? (
             <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Processing...</>
           ) : (
-            plan.id === 'free' ? 'Get Started' : 'Subscribe'
+            plan.id === 'free' ? 'Get Started' : 'Subscribe Now'
           )}
         </Button>
       </CardFooter>

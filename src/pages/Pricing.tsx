@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -11,10 +11,6 @@ import PricingTable from '@/components/pricing/PricingTable';
 import PricingFAQ from '@/components/pricing/PricingFAQ';
 import { pricingPlans } from '@/data/pricingPlans';
 import { API_BASE_URL } from '@/config/api';
-import { loadStripe } from '@stripe/stripe-js';
-
-// Initialize Stripe with the publishable key from env
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const Pricing: React.FC = () => {
   const { currentUser } = useAuth();
@@ -51,9 +47,7 @@ const Pricing: React.FC = () => {
         return;
       }
 
-      console.log(`Creating checkout session for plan: ${planId}`);
-
-      // For premium or pro plans, call the Stripe checkout API
+      // For premium or pro plans, call the checkout endpoint
       const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -61,26 +55,24 @@ const Pricing: React.FC = () => {
         },
         body: JSON.stringify({
           userId: currentUser.uid,
-          planType: planId, // premium or pro
+          planType: planId,
           successUrl: `${window.location.origin}/subscription-success`,
           cancelUrl: `${window.location.origin}/pricing`,
         }),
       });
 
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
       
-      console.log('Checkout session created:', data);
+      const data = await response.json();
       
       if (data.success && data.url) {
-        // Redirect directly to the Stripe checkout URL
-        console.log('Redirecting to:', data.url);
+        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
-        throw new Error(data.message || 'Failed to create checkout session');
+        throw new Error('Failed to create checkout session');
       }
     } catch (error) {
       console.error('Error creating checkout session:', error);
