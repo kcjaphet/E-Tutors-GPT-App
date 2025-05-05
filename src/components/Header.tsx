@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +9,7 @@ import { LogOut, User } from 'lucide-react';
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [logoError, setLogoError] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -23,8 +24,19 @@ const Header: React.FC = () => {
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
-          <NavLink to="/" className="flex items-center gap-2">
-            <span className="text-lg font-bold">GPTTextTools</span>
+          <NavLink to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/7a6163f8-b730-4054-949d-648fe7249316.png" 
+              alt="e-tutors logo" 
+              className="h-8 md:h-10 w-auto"
+              onError={(e) => {
+                console.error("Logo failed to load");
+                setLogoError(true);
+                // Fallback to text if image fails to load
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {logoError && <span className="text-lg font-bold">e-tutors</span>}
           </NavLink>
           
           <nav className="hidden md:flex items-center gap-6">
