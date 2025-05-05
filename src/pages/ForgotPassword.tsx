@@ -10,6 +10,7 @@ import { AlertCircle, Mail, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { API_ENDPOINTS } from "@/config/api";
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -32,8 +33,10 @@ const ForgotPassword: React.FC = () => {
       setLoading(true);
       await resetPassword(email);
       setMessage("Password reset email sent! Check your inbox.");
+      console.log("Password reset requested for:", email);
     } catch (err: any) {
       setError(err.message || "Failed to reset password");
+      console.error("Password reset error:", err);
     } finally {
       setLoading(false);
     }

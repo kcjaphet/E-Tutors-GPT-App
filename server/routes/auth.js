@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 
 // Register a new user
@@ -113,6 +114,7 @@ router.post('/login', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   try {
     const { email } = req.body;
+    console.log('Password reset requested for:', email);
 
     // Check if user exists
     const user = await User.findOne({ email });
@@ -124,21 +126,74 @@ router.post('/reset-password', async (req, res) => {
       });
     }
 
-    // In a real application, you would:
-    // 1. Generate a reset token
-    // 2. Save it to the user record with an expiration
-    // 3. Send an email with the reset link
+    // Generate reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
     
-    // For now, we'll just simulate success
+    // Save token to database with expiration time (1 hour)
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+    
+    console.log(`Reset token generated and saved for user: ${email}, token: ${resetToken}`);
+
+    // In a real application, you'd send an email with the reset link
+    // For this example, we'll simulate success and log the token
+    
     res.status(200).json({
       success: true,
-      message: 'If your email is registered, you will receive a reset link'
+      message: 'If your email is registered, you will receive a reset link',
+      // Do not include this in production, for demonstration only
+      debug: {
+        resetToken,
+        userId: user._id
+      }
     });
   } catch (error) {
     console.error('Password reset error:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Server error during password reset request' 
+    });
+  }
+});
+
+// Create an endpoint to verify token and reset password
+router.post('/reset-password/confirm', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    
+    // Find user with this token and check expiration
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password reset token is invalid or has expired'
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
+    // Update user password
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully'
+    });
+  } catch (error) {
+    console.error('Password reset confirmation error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Server error during password reset confirmation' 
     });
   }
 });

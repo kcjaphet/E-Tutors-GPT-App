@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { API_BASE_URL } from "@/config/api";
+import { API_BASE_URL, API_ENDPOINTS } from "@/config/api";
 import { useToast } from "@/components/ui/use-toast";
 
 interface User {
