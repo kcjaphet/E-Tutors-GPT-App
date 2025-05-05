@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
@@ -70,12 +71,18 @@ const Index = () => {
               Join thousands of users who are already enhancing their writing with our powerful tools.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-ring">
+              <Link 
+                to="/signup" 
+                className="inline-flex h-11 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-ring"
+              >
                 Get started for free
-              </button>
-              <button className="inline-flex h-11 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-secondary focus-ring">
+              </Link>
+              <Link 
+                to="/pricing" 
+                className="inline-flex h-11 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-secondary focus-ring"
+              >
                 View pricing
-              </button>
+              </Link>
             </div>
           </div>
         </section>
