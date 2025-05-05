@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,6 +9,7 @@ import { LogOut, User } from 'lucide-react';
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
+  const [logoError, setLogoError] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -19,8 +20,9 @@ const Header: React.FC = () => {
     }
   };
 
-  // Use the new logo
+  // Use the logo with appropriate error handling
   const logoPath = "/lovable-uploads/42b3da3c-ae68-47e9-b642-337f967e8374.png";
+  const fallbackLogo = "https://api.dicebear.com/6.x/initials/svg?seed=ET";
 
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
@@ -28,15 +30,14 @@ const Header: React.FC = () => {
         <div className="flex items-center gap-6">
           <NavLink to="/" className="flex items-center gap-2">
             <img 
-              src={logoPath}
+              src={logoError ? fallbackLogo : logoPath}
               alt="e-tutors logo" 
-              className="h-12" 
+              className="h-12 w-auto" 
               width="48"
               height="48"
-              onError={(e) => {
-                console.error("Logo failed to load, trying fallback");
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = "https://api.dicebear.com/6.x/initials/svg?seed=ET";
+              onError={() => {
+                console.log("Logo failed to load, using fallback");
+                setLogoError(true);
               }}
             />
           </NavLink>
