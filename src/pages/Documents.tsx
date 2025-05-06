@@ -1,251 +1,243 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
-  Card, 
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow 
+} from '@/components/ui/table';
+import { 
+  Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle 
 } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
-import {
-  FilePdf,
-  Search,
-  Plus,
-  Clock,
-  MoreVertical,
-  Download,
-  Trash2,
-  Share2,
-  MessageSquare,
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { API_ENDPOINTS } from '@/config/api';
+import { FileText, Trash2, Search, Upload, FileCheck } from 'lucide-react';
 
 interface Document {
-  id: string;
+  _id: string;
   title: string;
-  uploadDate: Date;
-  lastAccessed?: Date;
+  filename: string;
   size: number;
-  pages: number;
+  createdAt: string;
+  processingStatus: string;
 }
 
 const Documents: React.FC = () => {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const { currentUser } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate fetching documents
-    const fetchDocuments = async () => {
-      setIsLoading(true);
-      try {
-        // In a real app, this would be an API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
-        const mockDocuments: Document[] = [
-          {
-            id: '1',
-            title: 'Annual Report 2023.pdf',
-            uploadDate: new Date(2023, 10, 15),
-            lastAccessed: new Date(2023, 11, 20),
-            size: 2.4,
-            pages: 32
-          },
-          {
-            id: '2',
-            title: 'Research Paper - AI Trends.pdf',
-            uploadDate: new Date(2023, 9, 5),
-            lastAccessed: new Date(2023, 11, 18),
-            size: 1.8,
-            pages: 24
-          },
-          {
-            id: '3',
-            title: 'Product Specifications.pdf',
-            uploadDate: new Date(2023, 11, 1),
-            size: 3.2,
-            pages: 18
-          }
-        ];
-        
-        setDocuments(mockDocuments);
-      } catch (error) {
-        console.error('Error fetching documents:', error);
-        toast({
-          variant: "destructive",
-          title: "Failed to load documents",
-          description: "There was a problem loading your documents."
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
     fetchDocuments();
-  }, [toast]);
+  }, []);
 
-  // Redirect if not logged in
-  if (!currentUser) {
-    return <Navigate to="/login" />;
-  }
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.DOCUMENTS.LIST}`, {
+        headers: {
+          'Authorization': `Bearer ${currentUser?.token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setDocuments(data);
+    } catch (error) {
+      console.error("Could not fetch documents", error);
+      toast({
+        title: "Error fetching documents",
+        description: "Failed to load documents. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
-  const filteredDocuments = documents.filter(doc => 
-    doc.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFile(event.target.files[0]);
+    } else {
+      setFile(null);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast({
+        title: "No file selected",
+        description: "Please select a file to upload.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(`${API_ENDPOINTS.DOCUMENTS.UPLOAD}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${currentUser?.token}`
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload document');
+      }
+
+      toast({
+        title: "Upload successful",
+        description: "Your document has been successfully uploaded.",
+      });
+      fetchDocuments(); // Refresh document list
+      setFile(null); // Clear selected file
+    } catch (error: any) {
+      console.error("Upload failed", error);
+      toast({
+        title: "Upload failed",
+        description: error.message || "There was an error uploading your document.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.DOCUMENTS.DELETE.replace(':id', id)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${currentUser?.token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete document');
+      }
+
+      toast({
+        title: "Document deleted",
+        description: "The document has been successfully deleted.",
+      });
+      fetchDocuments(); // Refresh document list
+    } catch (error) {
+      console.error("Delete failed", error);
+      toast({
+        title: "Delete failed",
+        description: "There was an error deleting the document.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredDocuments = documents.filter(doc =>
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    doc.filename.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleDeleteDocument = (id: string, title: string) => {
-    // In a real app, this would be an API call
-    setDocuments(docs => docs.filter(doc => doc.id !== id));
-    
-    toast({
-      title: "Document deleted",
-      description: `${title} has been deleted.`
-    });
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
 
   return (
     <>
       <Header />
-      <main className="container mx-auto px-4 py-10">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">My Documents</h1>
-            <Button onClick={() => navigate('/document-chat')}>
-              <Plus className="h-4 w-4 mr-2" /> Upload New
-            </Button>
-          </div>
-          
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search documents..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Card key={i} className="animate-pulse">
-                  <CardHeader className="h-24 bg-muted"></CardHeader>
-                  <CardContent className="py-4">
-                    <div className="h-5 w-3/4 bg-muted rounded mb-2"></div>
-                    <div className="h-4 w-1/2 bg-muted rounded"></div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : filteredDocuments.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDocuments.map((doc) => (
-                <Card key={doc.id}>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center">
-                        <FilePdf className="h-8 w-8 text-red-500 mr-2" />
-                        <div>
-                          <CardTitle className="text-lg truncate max-w-[200px]">{doc.title}</CardTitle>
-                          <CardDescription>
-                            {doc.pages} pages • {doc.size} MB
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            onClick={() => navigate(`/document-chat?id=${doc.id}`)}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-2" /> Chat with this document
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Download className="h-4 w-4 mr-2" /> Download
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Share2 className="h-4 w-4 mr-2" /> Share
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            className="text-destructive focus:text-destructive"
-                            onClick={() => handleDeleteDocument(doc.id, doc.title)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Clock className="h-3.5 w-3.5 mr-1" />
-                      <span>
-                        Uploaded on {formatDate(doc.uploadDate)}
-                        {doc.lastAccessed && ` • Last accessed ${formatDate(doc.lastAccessed)}`}
-                      </span>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => navigate(`/document-chat?id=${doc.id}`)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Chat with Document
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-8 text-center">
-              <div className="flex flex-col items-center">
-                <FilePdf className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-xl font-medium mb-2">No documents found</h3>
-                <p className="text-muted-foreground mb-6">
-                  {searchQuery ? 'No documents match your search' : 'Upload your first document to get started'}
-                </p>
-                <Button onClick={() => navigate('/document-chat')}>
-                  <Plus className="h-4 w-4 mr-2" /> Upload Document
+      <main className="container py-10">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl">Your Documents</CardTitle>
+            <CardDescription>Manage and chat with your uploaded documents.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="text"
+                  placeholder="Search documents..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <Search className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Label htmlFor="upload" className="cursor-pointer">
+                  <div className="flex items-center space-x-2">
+                    <Upload className="h-5 w-5" />
+                    <span>Upload Document</span>
+                  </div>
+                </Label>
+                <Input
+                  type="file"
+                  id="upload"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <Button onClick={handleUpload} disabled={uploading}>
+                  {uploading ? "Uploading..." : "Upload"}
                 </Button>
               </div>
-            </Card>
-          )}
-        </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Filename</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredDocuments.map(doc => (
+                      <TableRow key={doc._id}>
+                        <TableCell>
+                          <Link to="/document-chat" state={{ documentId: doc._id }} className="flex items-center">
+                            <FileText className="mr-2 h-4 w-4" />
+                            {doc.title}
+                          </Link>
+                        </TableCell>
+                        <TableCell>{doc.filename}</TableCell>
+                        <TableCell>{(doc.size / 1024).toFixed(2)} KB</TableCell>
+                        <TableCell>
+                          <div className="flex items-center">
+                            {doc.processingStatus === 'completed' && <FileCheck className="mr-2 h-4 w-4 text-green-500" />}
+                            {doc.processingStatus}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" onClick={() => handleDelete(doc._id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {filteredDocuments.length === 0 && (
+                  <div className="text-center py-4">No documents found.</div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex justify-end"></CardFooter>
+        </Card>
       </main>
       <Footer />
     </>
