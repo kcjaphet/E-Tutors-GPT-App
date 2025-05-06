@@ -1,11 +1,11 @@
+
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '@/config/api';
 
 interface AuthContextType {
   currentUser: any;
   loading: boolean;
-  signup: (email: string, password: string) => Promise<any>;
+  signup: (email: string, password: string, name: string) => Promise<any>;
   login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<any>;
@@ -24,7 +24,6 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = () => {
@@ -38,14 +37,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     unsubscribe();
   }, []);
 
-  const signup = async (email: string, password: string) => {
+  const signup = async (email: string, password: string, name: string) => {
     try {
       const response = await fetch(`${API_ENDPOINTS.AUTH.SIGNUP}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, name }),
       });
 
       const data = await response.json();
@@ -88,10 +87,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Modified to not use useNavigate
   const logout = async () => {
     localStorage.removeItem('user');
     setCurrentUser(null);
-    navigate('/login');
+    // Navigation should be handled by the component using this function
+    return Promise.resolve();
   };
 
   const resetPassword = async (email: string) => {

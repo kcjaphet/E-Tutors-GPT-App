@@ -42,7 +42,7 @@ const Signup: React.FC = () => {
 
     try {
       setLoading(true);
-      await signup(email, password); // Removed the third argument (name) to match the function signature
+      await signup(email, password, name);
       navigate("/");
     } catch (err: any) {
       setError(err.message || "Failed to create an account");
