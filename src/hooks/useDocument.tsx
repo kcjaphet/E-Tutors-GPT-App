@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { API_BASE_URL } from '@/config/api';
@@ -29,20 +29,20 @@ export const useDocument = () => {
   const [messages, setMessages] = useState<DocumentMessage[]>([]);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(false);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     if (!currentUser) return;
     
     setIsLoadingDocuments(true);
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/documents/${currentUser.uid}`);
-      const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch documents');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       
-      setDocuments(data.data);
+      const data = await response.json();
+      setDocuments(data.data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
       toast({
@@ -50,10 +50,11 @@ export const useDocument = () => {
         title: "Failed to load documents",
         description: error instanceof Error ? error.message : "An unknown error occurred"
       });
+      setDocuments([]);
     } finally {
       setIsLoadingDocuments(false);
     }
-  };
+  }, [currentUser, toast]);
 
   const uploadDocument = async (file: File) => {
     if (!currentUser) {
@@ -77,11 +78,12 @@ export const useDocument = () => {
         body: formData,
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload document');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload document');
       }
+      
+      const data = await response.json();
       
       toast({
         title: "Document uploaded",
@@ -91,7 +93,7 @@ export const useDocument = () => {
       // Add welcome message
       setMessages([{
         role: 'assistant',
-        content: `I've analyzed ${file.name}. What would you like to know about this document?`,
+        content: `I've received ${file.name}. Processing for summary...`,
         timestamp: new Date()
       }]);
       
@@ -117,14 +119,16 @@ export const useDocument = () => {
     
     setProcessing(true);
     
-    // Add user message to chat immediately
-    const userMessage: DocumentMessage = {
-      role: 'user',
-      content: message,
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, userMessage]);
+    // Add user message to chat immediately (except for auto-summary)
+    if (message !== "Please provide a concise summary of this document.") {
+      const userMessage: DocumentMessage = {
+        role: 'user',
+        content: message,
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+    }
     
     try {
       const response = await fetch(`${API_BASE_URL}/api/documents/${documentId}/chat`, {
@@ -138,11 +142,12 @@ export const useDocument = () => {
         }),
       });
       
-      const data = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to get response');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to get response');
       }
+      
+      const data = await response.json();
       
       // Add assistant response to chat
       const assistantMessage: DocumentMessage = {

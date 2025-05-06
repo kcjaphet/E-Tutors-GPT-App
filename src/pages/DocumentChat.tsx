@@ -1,19 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useDocument } from '@/hooks/useDocument';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import { FileText } from 'lucide-react';
+import { FileText, ArrowLeft } from 'lucide-react';
 
 const DocumentChat: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { documentId } = location.state || {};
   const { 
     documents, 
@@ -34,17 +35,21 @@ const DocumentChat: React.FC = () => {
       const doc = documents.find(doc => doc._id === documentId);
       if (doc) {
         setSelectedDocument(doc);
-        // Initialize with a welcome message
+        // Request a summary immediately after loading the document
         setMessages([
           {
             role: 'assistant',
-            content: `Hello! I'm your document assistant. Ask me anything about "${doc.title}".`,
+            content: `I'm analyzing "${doc.title}". I'll generate a summary for you shortly...`,
             timestamp: new Date()
           }
         ]);
+        
+        setTimeout(() => {
+          chatWithDocument(doc._id, "Please provide a concise summary of this document.");
+        }, 500);
       }
     }
-  }, [documentId, documents, setSelectedDocument, setMessages]);
+  }, [documentId, documents, setSelectedDocument, setMessages, chatWithDocument]);
 
   const handleSendMessage = async () => {
     if (!input.trim() || chatLoading || !selectedDocument) return;
@@ -60,6 +65,10 @@ const DocumentChat: React.FC = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const goBack = () => {
+    navigate('/documents');
   };
 
   if (loading) {
@@ -95,9 +104,17 @@ const DocumentChat: React.FC = () => {
       <Header />
       <main className="container py-6">
         <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
-          <div className="flex items-center space-x-2">
-            <FileText className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">{selectedDocument.title}</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" onClick={goBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <FileText className="h-6 w-6" />
+              <h1 className="text-2xl font-bold">{selectedDocument.title}</h1>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {new Date(selectedDocument.createdAt).toLocaleDateString()}
+            </div>
           </div>
           
           <Card className="flex-1 flex flex-col h-[70vh]">
@@ -116,11 +133,7 @@ const DocumentChat: React.FC = () => {
                       }`}
                     >
                       <Avatar className="h-8 w-8">
-                        {message.role === 'user' ? (
-                          <AvatarFallback>U</AvatarFallback>
-                        ) : (
-                          <AvatarFallback>AI</AvatarFallback>
-                        )}
+                        <AvatarFallback>{message.role === 'user' ? 'U' : 'AI'}</AvatarFallback>
                       </Avatar>
                       <div 
                         className={`rounded-lg p-3 ${
@@ -164,7 +177,7 @@ const DocumentChat: React.FC = () => {
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask a question about this document..."
+                  placeholder="Ask more questions about this document..."
                   className="flex-1 resize-none"
                   rows={1}
                   onKeyDown={(e) => {
