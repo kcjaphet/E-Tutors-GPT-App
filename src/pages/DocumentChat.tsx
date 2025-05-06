@@ -1,10 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useDocument } from '@/hooks/useDocument';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -15,56 +15,43 @@ import { FileText } from 'lucide-react';
 const DocumentChat: React.FC = () => {
   const location = useLocation();
   const { documentId } = location.state || {};
-  const { document, loading, error } = useDocument(documentId);
-  const [messages, setMessages] = useState<any[]>([]);
+  const { 
+    documents, 
+    selectedDocument, 
+    setSelectedDocument, 
+    messages, 
+    setMessages, 
+    chatWithDocument, 
+    processing: chatLoading,
+    isLoadingDocuments: loading
+  } = useDocument();
+
   const [input, setInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (document) {
-      // Initialize with a welcome message
-      setMessages([
-        {
-          role: 'system',
-          content: `Hello! I'm your document assistant. Ask me anything about "${document.title}".`
-        }
-      ]);
+    if (documentId) {
+      const doc = documents.find(doc => doc._id === documentId);
+      if (doc) {
+        setSelectedDocument(doc);
+        // Initialize with a welcome message
+        setMessages([
+          {
+            role: 'assistant',
+            content: `Hello! I'm your document assistant. Ask me anything about "${doc.title}".`,
+            timestamp: new Date()
+          }
+        ]);
+      }
     }
-  }, [document]);
+  }, [documentId, documents, setSelectedDocument, setMessages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim() || chatLoading) return;
-
-    const userMessage = {
-      role: 'user',
-      content: input
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setChatLoading(true);
+    if (!input.trim() || chatLoading || !selectedDocument) return;
 
     try {
-      // Replace with your actual API call
-      const response = await fetch(`/api/documents/${documentId}/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message: input }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
-      const data = await response.json();
-      
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.response
-      }]);
+      await chatWithDocument(selectedDocument._id, input);
+      setInput('');
     } catch (error) {
       console.error('Error chatting with document:', error);
       toast({
@@ -72,13 +59,6 @@ const DocumentChat: React.FC = () => {
         description: "Failed to get a response. Please try again.",
         variant: "destructive",
       });
-      
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: "I'm sorry, I encountered an error processing your request. Please try again."
-      }]);
-    } finally {
-      setChatLoading(false);
     }
   };
 
@@ -96,7 +76,7 @@ const DocumentChat: React.FC = () => {
     );
   }
 
-  if (error || !document) {
+  if (!selectedDocument) {
     return (
       <>
         <Header />
@@ -117,7 +97,7 @@ const DocumentChat: React.FC = () => {
         <div className="flex flex-col space-y-4 max-w-4xl mx-auto">
           <div className="flex items-center space-x-2">
             <FileText className="h-6 w-6" />
-            <h1 className="text-2xl font-bold">{document.title}</h1>
+            <h1 className="text-2xl font-bold">{selectedDocument.title}</h1>
           </div>
           
           <Card className="flex-1 flex flex-col h-[70vh]">
