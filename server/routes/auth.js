@@ -1,185 +1,252 @@
-
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const { sendResetPasswordEmail } = require('../services/emailService');
 
-// Register a new user
+/**
+ * @route   POST /api/auth/signup
+ * @desc    Register new user
+ * @access  Public
+ */
 router.post('/signup', async (req, res) => {
-  try {
-    const { email, password, displayName } = req.body;
+  const { email, password, displayName } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'User with this email already exists' 
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please enter all fields'
+    });
+  }
+
+  try {
+    // Check if user exists
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists'
       });
     }
+
+    // Create new user
+    user = new User({
+      email,
+      password,
+      displayName
+    });
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    user.password = await bcrypt.hash(password, salt);
 
-    // Create user
-    const user = new User({
-      email,
-      password: hashedPassword,
-      displayName,
-    });
-
+    // Save user to database
     await user.save();
 
-    // Create JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'default_jwt_secret',
-      { expiresIn: '7d' }
-    );
-
-    // Return user data (without password)
-    res.status(201).json({
-      success: true,
+    // Create JWT
+    const payload = {
       user: {
-        _id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        uid: user._id, // For compatibility with previous Firebase uid
-      },
-      token
-    });
+        id: user.id
+      }
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' },
+      (err, token) => {
+        if (err) throw err;
+        res.status(201).json({
+          success: true,
+          message: 'User registered successfully',
+          token
+        });
+      }
+    );
   } catch (error) {
-    console.error('Signup error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error during registration' 
+    console.error('Error in signup route:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
     });
   }
 });
 
-// Login user
+/**
+ * @route   POST /api/auth/login
+ * @desc    Login user and return JWT
+ * @access  Public
+ */
 router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    // Find user
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid email or password' 
-      });
-    }
-
-    // Verify password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid email or password' 
-      });
-    }
-
-    // Create JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET || 'default_jwt_secret',
-      { expiresIn: '7d' }
-    );
-
-    // Return user data (without password)
-    res.status(200).json({
-      success: true,
-      user: {
-        _id: user._id,
-        email: user.email,
-        displayName: user.displayName,
-        uid: user._id, // For compatibility with previous Firebase uid
-      },
-      token
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error during login' 
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please enter all fields'
     });
   }
-});
 
-// Reset password request
-router.post('/reset-password', async (req, res) => {
   try {
-    const { email } = req.body;
-    console.log('Password reset requested for:', email);
-
     // Check if user exists
     const user = await User.findOne({ email });
     if (!user) {
-      // For security reasons, don't reveal if email exists or not
-      return res.status(200).json({ 
-        success: true, 
-        message: 'If your email is registered, you will receive a reset link' 
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid credentials'
       });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(20).toString('hex');
-    
-    // Save token to database with expiration time (1 hour)
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-    await user.save();
-    
-    console.log(`Reset token generated and saved for user: ${email}, token: ${resetToken}`);
+    // Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
 
-    // In a real application, you'd send an email with the reset link
-    // For this example, we'll simulate success and log the token
-    
-    res.status(200).json({
-      success: true,
-      message: 'If your email is registered, you will receive a reset link',
-      // Do not include this in production, for demonstration only
-      debug: {
-        resetToken,
-        userId: user._id
+    // Create JWT
+    const payload = {
+      user: {
+        id: user.id
       }
-    });
+    };
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' },
+      (err, token) => {
+        if (err) throw err;
+        res.json({
+          success: true,
+          message: 'Logged in successfully',
+          token
+        });
+      }
+    );
   } catch (error) {
-    console.error('Password reset error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error during password reset request' 
+    console.error('Error in login route:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
     });
   }
 });
 
-// Create an endpoint to verify token and reset password
-router.post('/reset-password/confirm', async (req, res) => {
+/**
+ * @route   POST /api/auth/reset-password
+ * @desc    Request a password reset by email
+ * @access  Public
+ */
+router.post('/reset-password', async (req, res) => {
   try {
-    const { token, password } = req.body;
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
     
-    // Find user with this token and check expiration
+    // Even if user is not found, return success to prevent email enumeration
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'Password reset link sent if email exists'
+      });
+    }
+
+    // Generate a random token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Set token expiration (1 hour)
+    const resetExpires = Date.now() + 3600000;
+
+    // Hash the token for security
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(resetToken)
+      .digest('hex');
+
+    // Update user with reset token and expiration
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpires = new Date(resetExpires);
+    await user.save();
+
+    // In a production environment, send an email with the reset link
+    // For now we'll just log it
+    console.log(`Password reset token for ${email}: ${resetToken}`);
+    console.log(`Reset link would be: ${process.env.FRONTEND_URL}/reset-password/${resetToken}`);
+
+    // If you have an email service set up:
+    // await sendResetPasswordEmail(user.email, resetToken);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset link sent to your email'
+    });
+
+  } catch (error) {
+    console.error('Error in reset password route:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   POST /api/auth/reset-password/:token
+ * @desc    Reset password using token
+ * @access  Public
+ */
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const { password } = req.body;
+    const { token } = req.params;
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password is required'
+      });
+    }
+
+    // Hash the token from the URL
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    // Find user with matching token and valid expiration
     const user = await User.findOne({
-      resetPasswordToken: token,
+      resetPasswordToken: hashedToken,
       resetPasswordExpires: { $gt: Date.now() }
     });
 
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: 'Password reset token is invalid or has expired'
+        message: 'Invalid or expired token'
       });
     }
 
-    // Hash new password
+    // Hash the new password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
-    // Update user password
+
+    // Update user password and clear reset token fields
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
@@ -187,13 +254,15 @@ router.post('/reset-password/confirm', async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password has been reset successfully'
+      message: 'Password reset successful'
     });
+
   } catch (error) {
-    console.error('Password reset confirmation error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error during password reset confirmation' 
+    console.error('Error in reset password completion:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
     });
   }
 });

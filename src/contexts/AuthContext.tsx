@@ -1,149 +1,105 @@
-
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { API_BASE_URL, API_ENDPOINTS } from "@/config/api";
-import { useToast } from "@/components/ui/use-toast";
-
-interface User {
-  _id: string;
-  email: string;
-  displayName?: string;
-  uid: string;
-}
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '@/config/api';
 
 interface AuthContextType {
-  currentUser: User | null;
+  currentUser: any;
   loading: boolean;
-  signup: (email: string, password: string, name: string) => Promise<User>;
-  login: (email: string, password: string) => Promise<User>;
+  signup: (email: string, password: string) => Promise<any>;
+  login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
-  resetPassword: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setCurrentUser(JSON.parse(user));
-    }
-    setLoading(false);
+    const unsubscribe = () => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        setCurrentUser(JSON.parse(user));
+      }
+      setLoading(false);
+    };
+
+    unsubscribe();
   }, []);
 
-  // Sign up function
-  const signup = async (email: string, password: string, name: string): Promise<User> => {
+  const signup = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-        method: "POST",
+      const response = await fetch(`${API_ENDPOINTS.AUTH.SIGNUP}`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, displayName: name }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create account");
-      }
-
-      const user = data.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
-      
-      toast({
-        title: "Account created",
-        description: "Your account has been successfully created!"
-      });
-      
-      return user;
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Signup failed",
-        description: error.message || "Failed to create account"
-      });
-      throw error;
-    }
-  };
-
-  // Login function
-  const login = async (email: string, password: string): Promise<User> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
+        throw new Error(data.message || 'Failed to signup');
       }
 
-      const user = data.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
-      
-      toast({
-        title: "Welcome back!",
-        description: "You've successfully logged in."
-      });
-      
-      return user;
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Login failed",
-        description: error.message || "Invalid credentials"
-      });
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setCurrentUser(data.user);
+      return data;
+    } catch (error) {
+      console.error('Signup failed:', error);
       throw error;
     }
   };
 
-  // Logout function
-  const logout = async (): Promise<void> => {
+  const login = async (email: string, password: string) => {
     try {
-      localStorage.removeItem("user");
-      setCurrentUser(null);
-      
-      toast({
-        title: "Logged out",
-        description: "You've been successfully logged out."
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Logout failed",
-        description: error.message
-      });
-      throw error;
-    }
-  };
-
-  // Reset password function
-  const resetPassword = async (email: string): Promise<void> => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
-        method: "POST",
+      const response = await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to login');
+      }
+
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setCurrentUser(data.user);
+      return data;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
+  };
+
+  const logout = async () => {
+    localStorage.removeItem('user');
+    setCurrentUser(null);
+    navigate('/login');
+  };
+
+  const resetPassword = async (email: string) => {
+    try {
+      const response = await fetch(`${API_ENDPOINTS.AUTH.RESET_PASSWORD}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email }),
       });
@@ -151,19 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.message || "Failed to send reset email");
+        throw new Error(data.message || 'Failed to request password reset');
       }
-      
-      toast({
-        title: "Password reset email sent",
-        description: "Check your inbox for further instructions."
-      });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Password reset failed",
-        description: error.message
-      });
+
+      return data;
+    } catch (error) {
+      console.error('Password reset request failed:', error);
       throw error;
     }
   };
@@ -174,12 +123,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signup,
     login,
     logout,
-    resetPassword
+    resetPassword,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
