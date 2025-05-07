@@ -1,149 +1,119 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, X } from 'lucide-react';
-
-// Create a custom hook to handle mobile detection
-const useMediaQuery = () => {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  React.useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
-  
-  return { isMobile };
-};
+import { Button } from '@/components/ui/button';
+import { LogOut, User } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { isMobile } = useMediaQuery();
+  const [logoError, setLogoError] = useState(false);
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error('Logout failed', error);
+      console.error("Failed to log out", error);
     }
   };
 
   return (
-    <header className="border-b">
-      <div className="container flex items-center justify-between py-4">
-        <Link to="/" className="flex items-center">
-          <h1 className="text-xl font-bold">e-tutors</h1>
-        </Link>
-
-        {isMobile ? (
-          <>
-            {/* Mobile menu */}
-            <Button variant="ghost" size="icon" onClick={() => setShowMobileMenu(!showMobileMenu)}>
-              {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </Button>
-            {showMobileMenu && (
-              <div className="fixed inset-0 top-[65px] z-50 bg-background">
-                <nav className="container grid gap-4 p-6">
-                  <Link to="/products" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Products</Link>
-                  <Link to="/pricing" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Pricing</Link>
-                  
-                  {currentUser ? (
-                    <>
-                      <Link to="/dashboard" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Dashboard</Link>
-                      <Link to="/documents" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Documents</Link>
-                      <Link to="/account" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Account</Link>
-                      <Button variant="outline" className="mt-4" onClick={handleLogout}>Log Out</Button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/login" className="text-lg font-medium" onClick={() => setShowMobileMenu(false)}>Log In</Link>
-                      <Link to="/signup">
-                        <Button className="w-full mt-4" onClick={() => setShowMobileMenu(false)}>
-                          Sign Up Free
-                        </Button>
-                      </Link>
-                    </>
-                  )}
-                </nav>
+    <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-black/80 border-b border-gray-200/50 dark:border-gray-800/50 transition-all duration-300">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-6">
+          <NavLink to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/7a6163f8-b730-4054-949d-648fe7249316.png" 
+              alt="e-tutors logo" 
+              className="h-8 md:h-10 w-auto"
+              onError={(e) => {
+                console.error("Logo failed to load");
+                setLogoError(true);
+                // Fallback to text if image fails to load
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            {logoError && <span className="text-lg font-bold">e-tutors</span>}
+          </NavLink>
+          
+          <nav className="hidden md:flex items-center gap-6">
+            <NavLink 
+              to="/" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+              end
+            >
+              Home
+            </NavLink>
+            <NavLink 
+              to="/products" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+            >
+              Products
+            </NavLink>
+            <NavLink 
+              to="/pricing" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+            >
+              Pricing
+            </NavLink>
+          </nav>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {currentUser ? (
+            <div className="flex items-center gap-4">
+              <div className="text-sm hidden md:block">
+                Hello, {currentUser.displayName || currentUser.email}
               </div>
-            )}
-          </>
-        ) : (
-          <>
-            {/* Desktop menu */}
-            <nav className="flex items-center space-x-6">
-              <Link to="/products" className="text-sm font-medium transition-colors hover:text-primary">
-                Products
-              </Link>
-              <Link to="/pricing" className="text-sm font-medium transition-colors hover:text-primary">
-                Pricing
-              </Link>
-              
-              {currentUser && (
-                <>
-                  <Link to="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
-                    Dashboard
-                  </Link>
-                  <Link to="/documents" className="text-sm font-medium transition-colors hover:text-primary">
-                    Documents
-                  </Link>
-                </>
-              )}
-            </nav>
-            <div className="flex items-center space-x-4">
-              {currentUser ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full overflow-hidden">
-                      <Avatar>
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(currentUser.email || 'User')}`} />
-                        <AvatarFallback>{currentUser.email?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{currentUser.email}</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/dashboard">Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/documents">Documents</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/account">Account Settings</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      Log Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <>
-                  <Link to="/login">
-                    <Button variant="ghost">Log In</Button>
-                  </Link>
-                  <Link to="/signup">
-                    <Button>Sign Up Free</Button>
-                  </Link>
-                </>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                aria-label="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
-          </>
-        )}
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/login')}
+                className="text-sm"
+              >
+                Login
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => navigate('/signup')}
+                className="text-sm"
+              >
+                Sign up
+              </Button>
+            </div>
+          )}
+          
+          <button
+            className="inline-flex items-center justify-center rounded-full w-8 h-8 text-sm font-medium transition-colors hover:bg-secondary hover:text-secondary-foreground focus-ring"
+            aria-label="Toggle theme"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-moon hidden dark:block"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sun block dark:hidden"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </button>
+        </div>
       </div>
     </header>
   );

@@ -7,10 +7,7 @@ import Index from '@/pages/Index';
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
 import Dashboard from '@/pages/Dashboard';
-import Documents from '@/pages/Documents';
-import DocumentChat from '@/pages/DocumentChat';
 import Account from '@/pages/Account';
 import Pricing from '@/pages/Pricing';
 import Products from '@/pages/Products';
@@ -20,8 +17,8 @@ import LiteratureReview from '@/pages/LiteratureReview';
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
+    <AuthProvider>
+      <Router>
         <div className="App">
           <Toaster />
           <Routes>
@@ -29,10 +26,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/documents" element={<Documents />} />
-            <Route path="/document-chat" element={<DocumentChat />} />
             <Route path="/account" element={<Account />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/products" element={<Products />} />
@@ -41,8 +35,8 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-      </AuthProvider>
-    </Router>
+      </Router>
+    </AuthProvider>
   );
 }
 

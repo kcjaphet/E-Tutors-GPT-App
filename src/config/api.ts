@@ -12,12 +12,6 @@ export const API_ENDPOINTS = {
   HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
   LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
   TEXT_PROCESS: `${API_BASE_URL}/api/text-process`,
-  DOCUMENTS: {
-    UPLOAD: `${API_BASE_URL}/api/documents/upload`,
-    LIST: `${API_BASE_URL}/api/documents`,
-    CHAT: `${API_BASE_URL}/api/documents/:id/chat`,
-    DELETE: `${API_BASE_URL}/api/documents/:id`
-  },
   AUTH: {
     SIGNUP: `${API_BASE_URL}/api/auth/signup`,
     LOGIN: `${API_BASE_URL}/api/auth/login`,
