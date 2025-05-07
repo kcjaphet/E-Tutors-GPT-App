@@ -2,10 +2,17 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { API_ENDPOINTS } from '@/config/api';
 
+interface User {
+  uid: string;
+  email: string;
+  displayName?: string;
+  token?: string;
+}
+
 interface AuthContextType {
-  currentUser: any;
+  currentUser: User | null;
   loading: boolean;
-  signup: (email: string, password: string, name: string) => Promise<any>;
+  signup: (email: string, password: string, displayName: string) => Promise<any>;
   login: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<any>;
@@ -22,29 +29,36 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = () => {
-      const user = localStorage.getItem('user');
-      if (user) {
-        setCurrentUser(JSON.parse(user));
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        console.error('Error parsing user from localStorage:', error);
+        localStorage.removeItem('user');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     unsubscribe();
   }, []);
 
-  const signup = async (email: string, password: string, name: string) => {
+  const signup = async (email: string, password: string, displayName: string) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.AUTH.SIGNUP}`, {
+      const response = await fetch(API_ENDPOINTS.AUTH.SIGNUP, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, displayName }),
       });
 
       const data = await response.json();
@@ -53,10 +67,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(data.message || 'Failed to signup');
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setCurrentUser(data.user);
+      // Create user object with token from response
+      const user = {
+        uid: data.user?.id || data.user?._id || Date.now().toString(),
+        email: email,
+        displayName: displayName,
+        token: data.token
+      };
+
+      localStorage.setItem('user', JSON.stringify(user));
+      setCurrentUser(user);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup failed:', error);
       throw error;
     }
@@ -64,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.AUTH.LOGIN}`, {
+      const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,10 +100,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error(data.message || 'Failed to login');
       }
 
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setCurrentUser(data.user);
+      // Create user object with token from response
+      const user = {
+        uid: data.user?.id || data.user?._id || Date.now().toString(),
+        email: email,
+        displayName: data.user?.displayName || email.split('@')[0],
+        token: data.token
+      };
+
+      localStorage.setItem('user', JSON.stringify(user));
+      setCurrentUser(user);
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
       throw error;
     }
@@ -97,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetPassword = async (email: string) => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.AUTH.RESET_PASSWORD}`, {
+      const response = await fetch(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Password reset request failed:', error);
       throw error;
     }
