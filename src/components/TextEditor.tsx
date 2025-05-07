@@ -7,6 +7,7 @@ interface TextEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   loading?: boolean;
+  readOnly?: boolean;
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
@@ -14,6 +15,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   onChange,
   placeholder = 'Start typing...',
   loading = false,
+  readOnly = false,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   
@@ -39,11 +41,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
       
       <textarea
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => !readOnly && onChange(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         placeholder={placeholder}
         className="w-full h-64 p-4 bg-transparent resize-none focus:outline-none"
+        readOnly={readOnly}
       />
       
       <div className="flex justify-between items-center px-4 py-2 text-xs text-muted-foreground border-t">

@@ -6,9 +6,11 @@ const { OpenAI } = require("openai");
 // Import the checkSubscription middleware
 const checkSubscription = require('../middleware/checkSubscription');
 
-// Initialize OpenAI API
+// Initialize OpenAI API with timeout
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 60000, // 60 second timeout
+  maxRetries: 3,
 });
 
 /**
@@ -27,43 +29,55 @@ router.post('/detect-ai-text', checkSubscription, async (req, res) => {
       });
     }
 
-    // OpenAI Moderation API call
-    const openaiResponse = await openai.moderations.create({
-      input: text,
-    });
+    // OpenAI Moderation API call with error handling
+    let moderation;
+    try {
+      const openaiResponse = await openai.moderations.create({
+        input: text,
+      });
+      moderation = openaiResponse.results[0];
+    } catch (moderationError) {
+      console.error('OpenAI Moderation API Error:', moderationError);
+      // Continue without moderation if it fails
+      moderation = { flagged: false };
+    }
 
     // Determine if text is flagged by OpenAI
-    const moderation = openaiResponse.results[0];
     const isFlagged = moderation.flagged;
 
-    // Use OpenAI to analyze the text
-    const analyzeResponse = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are an AI detection system. Analyze the following text and determine the probability it was written by AI. Return only a number between 0 and 100 representing the percentage likelihood it was AI-generated."
-        },
-        {
-          role: "user",
-          content: text
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 10,
-    });
-
-    // Extract AI probability from response
+    // Use OpenAI to analyze the text with error handling
     let aiProbability = 50; // Default value
     try {
-      const probText = analyzeResponse.choices[0].message.content.trim();
-      // Extract number from the response
-      const match = probText.match(/\d+/);
-      if (match) {
-        aiProbability = parseFloat(match[0]);
+      const analyzeResponse = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an AI detection system. Analyze the following text and determine the probability it was written by AI. Return only a number between 0 and 100 representing the percentage likelihood it was AI-generated."
+          },
+          {
+            role: "user",
+            content: text
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 10,
+      });
+
+      // Extract AI probability from response
+      try {
+        const probText = analyzeResponse.choices[0].message.content.trim();
+        // Extract number from the response
+        const match = probText.match(/\d+/);
+        if (match) {
+          aiProbability = parseFloat(match[0]);
+        }
+      } catch (parseError) {
+        console.error('Error parsing AI probability:', parseError);
       }
-    } catch (parseError) {
-      console.error('Error parsing AI probability:', parseError);
+    } catch (openaiError) {
+      console.error('OpenAI Analysis Error:', openaiError);
+      // Continue with default value if OpenAI fails
     }
 
     // If text is flagged by OpenAI moderation, increase the probability
@@ -105,7 +119,7 @@ router.post('/detect-ai-text', checkSubscription, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to detect AI text',
-      error: error.message,
+      error: error.message || 'Connection error',
     });
   }
 });

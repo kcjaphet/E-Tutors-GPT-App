@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Subscription } from './useSubscription';
-import { API_BASE_URL } from '@/config/api';
+import { API_BASE_URL, API_CONFIG } from '@/config/api';
 
 export interface DetectionResult {
   aiProbability: number;
@@ -60,6 +61,46 @@ export const useTextOperations = (
     reader.readAsText(file);
   };
 
+  // Utility function to fetch with timeout and retry
+  const fetchWithRetry = async (url: string, options: RequestInit, retries = API_CONFIG.RETRY_ATTEMPTS) => {
+    const timeout = API_CONFIG.TIMEOUT;
+    
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error occurred' }));
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+      }
+      
+      return response;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Request timeout. The server took too long to respond.');
+      }
+      
+      if (retries > 0) {
+        console.log(`Retrying request. Attempts remaining: ${retries}`);
+        // Wait a bit before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, 1000 * (API_CONFIG.RETRY_ATTEMPTS - retries + 1)));
+        return fetchWithRetry(url, options, retries - 1);
+      }
+      
+      throw error;
+    }
+  };
+
   const detectAIText = async () => {
     if (!inputText.trim()) {
       toast({
@@ -85,22 +126,19 @@ export const useTextOperations = (
     setHumanizationResult(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/detect-ai-text`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          text: inputText,
-          userId: currentUser.uid
-        }),
-      });
+      const response = await fetchWithRetry(
+        `${API_BASE_URL}/api/detect-ai-text`, 
+        {
+          method: 'POST',
+          headers: API_CONFIG.HEADERS,
+          body: JSON.stringify({ 
+            text: inputText,
+            userId: currentUser?.uid || 'anonymous'
+          }),
+        }
+      );
       
       const responseData = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to detect AI text');
-      }
       
       setDetectionResult(responseData.data);
       
@@ -129,7 +167,9 @@ ${responseData.data.analysis}
       toast({
         variant: "destructive",
         title: "Detection failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred"
+        description: error instanceof Error 
+          ? `${error.message} Please try again later.` 
+          : "Connection error. Please check your internet connection and try again."
       });
     } finally {
       setIsDetecting(false);
@@ -161,22 +201,19 @@ ${responseData.data.analysis}
     setHumanizationResult(null);
     
     try {
-      const response = await fetch(`${API_BASE_URL}/api/humanize-text`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          text: inputText,
-          userId: currentUser.uid 
-        }),
-      });
+      const response = await fetchWithRetry(
+        `${API_BASE_URL}/api/humanize-text`,
+        {
+          method: 'POST',
+          headers: API_CONFIG.HEADERS,
+          body: JSON.stringify({ 
+            text: inputText,
+            userId: currentUser?.uid || 'anonymous'
+          }),
+        }
+      );
       
       const responseData = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(responseData.message || 'Failed to humanize text');
-      }
       
       setHumanizationResult(responseData.data);
       
@@ -197,7 +234,9 @@ ${responseData.data.analysis}
       toast({
         variant: "destructive",
         title: "Humanization failed",
-        description: error instanceof Error ? error.message : "An unknown error occurred"
+        description: error instanceof Error 
+          ? `${error.message} Please try again later.` 
+          : "Connection error. Please check your internet connection and try again."
       });
     } finally {
       setIsHumanizing(false);

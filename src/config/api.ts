@@ -20,6 +20,15 @@ export const API_ENDPOINTS = {
   }
 };
 
+// API request configuration
+export const API_CONFIG = {
+  TIMEOUT: 30000, // 30 seconds timeout
+  RETRY_ATTEMPTS: 2,
+  HEADERS: {
+    'Content-Type': 'application/json',
+  }
+};
+
 // Configuration for optional features
 export const FEATURES_CONFIG = {
   // Enable or disable features based on environment variables
