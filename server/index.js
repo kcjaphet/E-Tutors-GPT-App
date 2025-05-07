@@ -10,6 +10,8 @@ const webhookRoutes = require('./routes/webhook');
 const authRoutes = require('./routes/auth');
 const textToolsRoutes = require('./routes/textTools');
 const dbTestRoutes = require('./routes/db-test');
+const fs = require('fs');
+const path = require('path');
 
 // Load environment variables
 loadEnv();
@@ -19,6 +21,12 @@ connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 // Middleware
 app.use(cors({

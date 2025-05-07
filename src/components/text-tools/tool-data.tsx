@@ -10,7 +10,8 @@ import {
   RefreshCw,
   BookText,
   Shield,
-  User
+  User,
+  FileUp
 } from 'lucide-react';
 
 export const tools: Tool[] = [
@@ -28,6 +29,14 @@ export const tools: Tool[] = [
     description: 'Make AI-generated text read more like human writing',
     icon: <User className="w-5 h-5" />,
     linkTo: '/dashboard',
+    prompt: ''
+  },
+  {
+    id: 'pdf-summary',
+    title: 'PDF Summary',
+    description: 'Extract and summarize content from PDF files',
+    icon: <FileUp className="w-5 h-5" />,
+    linkTo: '/pdf-summary',
     prompt: ''
   },
   {

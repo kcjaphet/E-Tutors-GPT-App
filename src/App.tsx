@@ -14,6 +14,7 @@ import Products from '@/pages/Products';
 import SubscriptionSuccess from '@/pages/SubscriptionSuccess';
 import NotFound from '@/pages/NotFound';
 import LiteratureReview from '@/pages/LiteratureReview';
+import PDFSummary from '@/pages/PDFSummary';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/subscription-success" element={<SubscriptionSuccess />} />
             <Route path="/literature-review" element={<LiteratureReview />} />
+            <Route path="/pdf-summary" element={<PDFSummary />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

@@ -2,11 +2,38 @@
 const express = require('express');
 const router = express.Router();
 const { OpenAI } = require('openai');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+const { PDFExtract } = require('pdf.js-extract');
 
 // Initialize OpenAI API
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: function (req, file, cb) {
+      const uploadDir = path.join(__dirname, '../uploads');
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      
+      cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+  })
+});
+
+// Initialize PDF extractor
+const pdfExtract = new PDFExtract();
 
 /**
  * @route   POST /api/text-process
@@ -128,6 +155,103 @@ router.post('/text-process', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to process text',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * @route   POST /api/pdf-summary
+ * @desc    Extract and summarize text from a PDF file
+ * @access  Public
+ */
+router.post('/pdf-summary', upload.single('pdfFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'No PDF file provided'
+      });
+    }
+
+    const filePath = req.file.path;
+    
+    // Extract text from PDF
+    const pdfData = await pdfExtract.extract(filePath, {});
+    
+    if (!pdfData || !pdfData.pages || pdfData.pages.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to extract text from PDF or PDF is empty'
+      });
+    }
+    
+    // Concatenate all the content from pages
+    let pdfText = '';
+    pdfData.pages.forEach(page => {
+      if (page.content && page.content.length > 0) {
+        page.content.forEach(item => {
+          pdfText += item.str + ' ';
+        });
+      }
+    });
+
+    // Check if we got any meaningful text
+    if (pdfText.trim().length < 10) {
+      return res.status(400).json({
+        success: false,
+        message: 'Could not extract meaningful text from the PDF'
+      });
+    }
+
+    // Call OpenAI API to summarize the text
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are an expert at summarizing documents. Create a clear, concise summary that captures the main points and key details of the document. Organize the summary with headings and bullet points where appropriate."
+        },
+        {
+          role: "user",
+          content: `Summarize the following document text: "${pdfText.substring(0, 15000)}"`
+        }
+      ],
+      temperature: 0.5,
+      max_tokens: 2000,
+    });
+
+    if (!response.choices || response.choices.length === 0) {
+      console.error('OpenAI API Error:', response);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to summarize PDF',
+        error: 'No response from OpenAI'
+      });
+    }
+
+    const summary = response.choices[0].message.content.trim();
+
+    // Delete the temporary file
+    try {
+      fs.unlinkSync(filePath);
+    } catch (unlinkError) {
+      console.error('Error deleting temporary file:', unlinkError);
+    }
+
+    res.json({
+      success: true,
+      data: {
+        fileName: req.file.originalname,
+        summary: summary,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error processing PDF:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process PDF',
       error: error.message
     });
   }
