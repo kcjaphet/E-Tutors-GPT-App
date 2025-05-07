@@ -10,6 +10,8 @@ const { PDFExtract } = require('pdf.js-extract');
 // Initialize OpenAI API
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 60000, // 60 second timeout
+  maxRetries: 3,
 });
 
 // Configure multer for file uploads
@@ -29,7 +31,8 @@ const upload = multer({
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       cb(null, uniqueSuffix + '-' + file.originalname);
     }
-  })
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
 // Initialize PDF extractor
@@ -176,6 +179,9 @@ router.post('/pdf-summary', upload.single('pdfFile'), async (req, res) => {
 
     const filePath = req.file.path;
     
+    console.log('Processing PDF:', req.file.originalname);
+    console.log('File path:', filePath);
+    
     // Extract text from PDF
     const pdfData = await pdfExtract.extract(filePath, {});
     
@@ -204,6 +210,8 @@ router.post('/pdf-summary', upload.single('pdfFile'), async (req, res) => {
       });
     }
 
+    console.log(`Extracted ${pdfText.length} characters from PDF`);
+
     // Call OpenAI API to summarize the text
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -231,6 +239,7 @@ router.post('/pdf-summary', upload.single('pdfFile'), async (req, res) => {
     }
 
     const summary = response.choices[0].message.content.trim();
+    console.log('PDF successfully summarized');
 
     // Delete the temporary file
     try {

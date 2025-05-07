@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { API_ENDPOINTS } from '@/config/api';
 import { FileUp, FileText, Copy, RefreshCw } from 'lucide-react';
 import TextEditor from '@/components/TextEditor';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const PDFSummary: React.FC = () => {
   const { currentUser } = useAuth();
@@ -18,10 +19,13 @@ const PDFSummary: React.FC = () => {
   const [summaryText, setSummaryText] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [textCopied, setTextCopied] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
+
+    setError(null);
 
     if (selectedFile.type !== 'application/pdf') {
       toast({
@@ -50,6 +54,7 @@ const PDFSummary: React.FC = () => {
     }
     
     setIsProcessing(true);
+    setError(null);
     
     try {
       // Create a FormData object to send the file
@@ -80,6 +85,7 @@ const PDFSummary: React.FC = () => {
       });
     } catch (error) {
       console.error('Error processing PDF:', error);
+      setError(error instanceof Error ? error.message : "An unknown error occurred");
       toast({
         variant: "destructive",
         title: "Processing failed",
@@ -109,6 +115,13 @@ const PDFSummary: React.FC = () => {
         <div className="max-w-5xl mx-auto">
           <h1 className="text-3xl font-bold mb-6">PDF Summary Tool</h1>
           
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           {/* File upload card */}
           <Card className="mb-8">
             <CardHeader>
@@ -121,7 +134,10 @@ const PDFSummary: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+              <div 
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => document.getElementById('pdf-upload')?.click()}
+              >
                 <input
                   id="pdf-upload"
                   type="file"
@@ -129,13 +145,13 @@ const PDFSummary: React.FC = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-                <label htmlFor="pdf-upload" className="cursor-pointer text-center">
+                <div className="cursor-pointer text-center">
                   <FileUp className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-500 mb-1">
                     Click to upload or drag and drop
                   </p>
                   <p className="text-xs text-gray-500">PDF files only</p>
-                </label>
+                </div>
               </div>
               {fileName && (
                 <p className="mt-2 text-sm text-gray-600">
