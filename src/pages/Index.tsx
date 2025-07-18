@@ -17,7 +17,7 @@ const Index = () => {
         {/* Hero Section */}
         <Hero />
         
-        {/* Humanizer Trial Section */}
+        {/* Humanizer Trial Section - Moved up */}
         <HumanizerTrial />
         
         {/* Features Section */}
