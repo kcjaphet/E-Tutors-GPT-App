@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { RefreshCw, Copy, User } from 'lucide-react';
+import { RefreshCw, Copy, User, FileText } from 'lucide-react';
 import { API_ENDPOINTS } from '@/config/api';
 
 const HumanizerTrial: React.FC = () => {
@@ -95,6 +95,10 @@ const HumanizerTrial: React.FC = () => {
   const loadSampleText = (text: string) => {
     setInputText(text);
     setOutputText('');
+    toast({
+      title: "Sample text loaded",
+      description: "You can now test the humanizer with this sample text"
+    });
   };
 
   return (
@@ -118,6 +122,32 @@ const HumanizerTrial: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Sample Texts Section - Enhanced */}
+            <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border">
+              <div className="flex items-center gap-2 mb-3">
+                <FileText className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-foreground">Try these sample AI-generated texts:</span>
+              </div>
+              <div className="grid gap-2">
+                {sampleTexts.map((text, index) => (
+                  <button
+                    key={index}
+                    onClick={() => loadSampleText(text)}
+                    className="text-left p-3 text-sm bg-background hover:bg-primary/5 border border-border rounded-md transition-colors duration-200 hover:border-primary/30"
+                  >
+                    <div className="flex items-start gap-2">
+                      <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded font-medium shrink-0">
+                        Sample {index + 1}
+                      </span>
+                      <span className="text-muted-foreground line-clamp-2">
+                        {text.length > 80 ? `${text.substring(0, 80)}...` : text}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="trial-input" className="text-sm font-medium">
                 Enter your AI-generated text (max 500 characters)
@@ -126,7 +156,7 @@ const HumanizerTrial: React.FC = () => {
                 id="trial-input"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Paste your AI-generated text here..."
+                placeholder="Paste your AI-generated text here or use one of the sample texts above..."
                 className="min-h-[120px] resize-none"
                 maxLength={500}
               />
@@ -134,18 +164,17 @@ const HumanizerTrial: React.FC = () => {
                 <span className="text-xs text-muted-foreground">
                   {inputText.length}/500 characters
                 </span>
-                <div className="flex gap-2">
-                  <span className="text-xs text-muted-foreground">Try a sample:</span>
-                  {sampleTexts.map((text, index) => (
-                    <button
-                      key={index}
-                      onClick={() => loadSampleText(text)}
-                      className="text-xs text-primary hover:underline"
-                    >
-                      Sample {index + 1}
-                    </button>
-                  ))}
-                </div>
+                {inputText && (
+                  <button
+                    onClick={() => {
+                      setInputText('');
+                      setOutputText('');
+                    }}
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Clear text
+                  </button>
+                )}
               </div>
             </div>
 
