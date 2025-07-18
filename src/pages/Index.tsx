@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Hero from '@/components/Hero';
 import TextTools from '@/components/TextTools';
+import HumanizerTrial from '@/components/HumanizerTrial';
 import { motion } from 'framer-motion';
 
 const Index = () => {
@@ -15,6 +16,9 @@ const Index = () => {
       <main className="flex-1">
         {/* Hero Section */}
         <Hero />
+        
+        {/* Humanizer Trial Section */}
+        <HumanizerTrial />
         
         {/* Features Section */}
         <section className="container px-4 py-16 md:py-24">

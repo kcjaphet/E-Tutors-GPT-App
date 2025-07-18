@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Subscription } from './useSubscription';
+import { useHumanization } from './useHumanization';
 import { API_BASE_URL, API_CONFIG } from '@/config/api';
 
 export interface DetectionResult {
@@ -10,14 +11,6 @@ export interface DetectionResult {
   analysis: string;
   textLength: number;
   timestamp: string;
-}
-
-export interface HumanizationResult {
-  originalText: string;
-  humanizedText: string;
-  textLength: number;
-  timestamp: string;
-  note?: string;
 }
 
 export const useTextOperations = (
@@ -29,10 +22,11 @@ export const useTextOperations = (
   const [inputText, setInputText] = useState('');
   const [resultText, setResultText] = useState('');
   const [isDetecting, setIsDetecting] = useState(false);
-  const [isHumanizing, setIsHumanizing] = useState(false);
   const [textCopied, setTextCopied] = useState(false);
   const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
-  const [humanizationResult, setHumanizationResult] = useState<HumanizationResult | null>(null);
+
+  // Use the new humanization hook
+  const { humanizeText, isHumanizing, humanizationResult, setHumanizationResult } = useHumanization();
 
   const handleTextChange = (value: string) => {
     setInputText(value);
@@ -176,16 +170,7 @@ ${responseData.data.analysis}
     }
   };
 
-  const humanizeText = async () => {
-    if (!inputText.trim()) {
-      toast({
-        variant: "destructive",
-        title: "No text provided",
-        description: "Please enter or upload some text first"
-      });
-      return;
-    }
-
+  const handleHumanizeText = async () => {
     // Check subscription limits for free plan
     if (subscription?.planType === 'free' && subscription?.usageThisMonth.humanizations >= 3) {
       toast({
@@ -196,50 +181,15 @@ ${responseData.data.analysis}
       return;
     }
 
-    setIsHumanizing(true);
     setDetectionResult(null);
-    setHumanizationResult(null);
     
-    try {
-      const response = await fetchWithRetry(
-        `${API_BASE_URL}/api/humanize-text`,
-        {
-          method: 'POST',
-          headers: API_CONFIG.HEADERS,
-          body: JSON.stringify({ 
-            text: inputText,
-            userId: currentUser?.uid || 'anonymous'
-          }),
-        }
-      );
-      
-      const responseData = await response.json();
-      
-      setHumanizationResult(responseData.data);
-      
-      // Format result for display
-      const result = responseData.data.humanizedText;
-      
-      setResultText(result);
-      
-      toast({
-        title: "Humanization complete",
-        description: responseData.data.note || "Your text has been humanized successfully"
-      });
-      
+    const result = await humanizeText(inputText, currentUser?.uid || 'anonymous', () => {
       // Refresh subscription data to get updated usage
       fetchSubscription();
-    } catch (error) {
-      console.error('Error humanizing text:', error);
-      toast({
-        variant: "destructive",
-        title: "Humanization failed",
-        description: error instanceof Error 
-          ? `${error.message} Please try again later.` 
-          : "Connection error. Please check your internet connection and try again."
-      });
-    } finally {
-      setIsHumanizing(false);
+    });
+    
+    if (result) {
+      setResultText(result.humanizedText);
     }
   };
 
@@ -266,7 +216,7 @@ ${responseData.data.analysis}
     handleTextChange,
     handleFileUpload,
     detectAIText,
-    humanizeText,
+    humanizeText: handleHumanizeText,
     copyToClipboard
   };
 };

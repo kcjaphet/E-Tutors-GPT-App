@@ -1,15 +1,10 @@
 
 const express = require('express');
 const router = express.Router();
-const { OpenAI } = require('openai');
+const { humanizeText } = require('../services/humanizationService');
 
 // Import the checkSubscription middleware
 const checkSubscription = require('../middleware/checkSubscription');
-
-// Initialize OpenAI with API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 /**
  * @route   POST /api/humanize-text
@@ -18,64 +13,28 @@ const openai = new OpenAI({
  */
 router.post('/humanize-text', checkSubscription, async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, userId = 'anonymous' } = req.body;
 
-    if (!text) {
+    if (!text || text.trim().length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'No text provided'
+        message: 'Text input is required'
       });
     }
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are an assistant that rewrites text to sound more natural and human-like. Maintain the original meaning but make the text flow better, use varied sentence structures, and eliminate patterns typical of AI-generated content."
-        },
-        {
-          role: "user",
-          content: `Rewrite the following text to sound more human-like and natural: \n\n${text}`
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
-
-    if (!response.choices || response.choices.length === 0) {
-      console.error('OpenAI API Error:', response);
-      return res.status(500).json({
+    // For trial users, limit text length
+    if (userId === 'trial-user' && text.length > 500) {
+      return res.status(400).json({
         success: false,
-        message: 'Failed to humanize text',
-        error: 'No response from OpenAI'
+        message: 'Trial users are limited to 500 characters'
       });
     }
 
-    const humanizedText = response.choices[0].message.content.trim();
-
-    // Check if the humanized text is the same as the original text
-    if (humanizedText === text.trim()) {
-      return res.json({
-        success: true,
-        data: {
-          originalText: text,
-          humanizedText: humanizedText,
-          textLength: text.length,
-          timestamp: new Date().toISOString(),
-          note: "The text couldn't be humanized further."
-        }
-      });
-    }
+    const result = await humanizeText(text, userId);
 
     res.json({
       success: true,
-      data: {
-        originalText: text,
-        humanizedText: humanizedText,
-        textLength: text.length,
-        timestamp: new Date().toISOString()
-      }
+      data: result
     });
   } catch (error) {
     console.error('Error humanizing text:', error);
