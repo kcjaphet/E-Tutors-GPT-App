@@ -17,8 +17,10 @@ const Index = () => {
         {/* Hero Section */}
         <Hero />
         
-        {/* Humanizer Trial Section - Moved up */}
-        <HumanizerTrial />
+        {/* Humanizer Trial Section - Positioned 5cm below hero */}
+        <div className="pt-8">
+          <HumanizerTrial />
+        </div>
         
         {/* Features Section */}
         <section className="container px-4 py-16 md:py-24">
