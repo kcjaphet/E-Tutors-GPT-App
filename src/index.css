@@ -122,7 +122,9 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-medium tracking-tight;
   }
-  
+}
+
+@layer components {
   .glass-panel {
     @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg;
   }
@@ -135,9 +137,9 @@
     @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary;
   }
   
+  /* Fixed animations - removed opacity conflicts */
   .animate-in {
     animation: fade-in 0.5s ease forwards;
-    opacity: 0;
   }
   
   .stagger-1 { animation-delay: 0.1s; }
@@ -146,10 +148,16 @@
   .stagger-4 { animation-delay: 0.4s; }
   .stagger-5 { animation-delay: 0.5s; }
   
-  /* Add fade-in keyframes */
+  /* Improved fade-in keyframes */
   @keyframes fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { 
+      opacity: 0; 
+      transform: translateY(10px);
+    }
+    100% { 
+      opacity: 1; 
+      transform: translateY(0);
+    }
   }
   
   /* Add new futuristic grid style for the hero background */
