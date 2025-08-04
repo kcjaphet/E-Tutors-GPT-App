@@ -47,37 +47,66 @@ router.post('/detect-ai-text', checkSubscription, async (req, res) => {
 
     // Use OpenAI to analyze the text with error handling
     let aiProbability = 50; // Default value
+    let reasoning = "Unable to perform detailed analysis.";
+    let highlightedSegments = [];
+    
     try {
+      // Get detailed analysis with reasoning
       const analyzeResponse = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are an AI detection system. Analyze the following text and determine the probability it was written by AI. Return only a number between 0 and 100 representing the percentage likelihood it was AI-generated."
+            content: `You are an expert AI detection system. Analyze the text for AI-generated content and provide:
+1. A probability score (0-100) that the text was AI-generated
+2. Detailed reasoning for your assessment
+3. Specific segments that indicate AI generation (if any)
+
+Respond in JSON format:
+{
+  "probability": number,
+  "reasoning": "string explaining your assessment",
+  "suspiciousSegments": ["array of text segments that seem AI-generated"]
+}`
           },
           {
             role: "user",
             content: text
           }
         ],
-        temperature: 0.3,
-        max_tokens: 10,
+        temperature: 0.2,
+        max_tokens: 500,
       });
 
-      // Extract AI probability from response
+      // Parse the JSON response
       try {
+        const responseText = analyzeResponse.choices[0].message.content.trim();
+        const analysis = JSON.parse(responseText);
+        
+        if (analysis.probability !== undefined) {
+          aiProbability = Math.max(0, Math.min(100, analysis.probability));
+        }
+        if (analysis.reasoning) {
+          reasoning = analysis.reasoning;
+        }
+        if (analysis.suspiciousSegments && Array.isArray(analysis.suspiciousSegments)) {
+          highlightedSegments = analysis.suspiciousSegments.filter(segment => 
+            typeof segment === 'string' && segment.length > 0
+          );
+        }
+      } catch (parseError) {
+        console.error('Error parsing AI analysis:', parseError);
+        // Fallback to simple analysis
         const probText = analyzeResponse.choices[0].message.content.trim();
-        // Extract number from the response
         const match = probText.match(/\d+/);
         if (match) {
           aiProbability = parseFloat(match[0]);
         }
-      } catch (parseError) {
-        console.error('Error parsing AI probability:', parseError);
+        reasoning = "Basic analysis performed due to parsing limitations.";
       }
     } catch (openaiError) {
       console.error('OpenAI Analysis Error:', openaiError);
-      // Continue with default value if OpenAI fails
+      // Continue with default values
     }
 
     // If text is flagged by OpenAI moderation, increase the probability
@@ -105,6 +134,8 @@ router.post('/detect-ai-text', checkSubscription, async (req, res) => {
       aiProbability,
       confidenceLevel,
       analysis,
+      reasoning,
+      highlightedSegments,
       textLength: text.length,
       timestamp: new Date().toISOString(),
     };

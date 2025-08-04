@@ -9,6 +9,8 @@ export interface DetectionResult {
   aiProbability: number;
   confidenceLevel: string;
   analysis: string;
+  reasoning: string;
+  highlightedSegments: string[];
   textLength: number;
   timestamp: string;
 }
@@ -136,18 +138,8 @@ export const useTextOperations = (
       
       setDetectionResult(responseData.data);
       
-      // Format result for display
-      const result = `
-AI Detection Results:
------------------------
-AI Probability: ${responseData.data.aiProbability.toFixed(1)}%
-Confidence: ${responseData.data.confidenceLevel}
-
-Analysis:
-${responseData.data.analysis}
-`;
-      
-      setResultText(result);
+      // Format result for display - now handled by ResultCard component
+      setResultText("AI Detection Complete");
       
       toast({
         title: "Detection complete",

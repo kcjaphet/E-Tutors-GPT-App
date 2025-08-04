@@ -75,6 +75,7 @@ const Dashboard: React.FC = () => {
             humanizationResult={humanizationResult}
             copyToClipboard={copyToClipboard}
             textCopied={textCopied}
+            inputText={inputText}
           />
         </div>
       </main>
