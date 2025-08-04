@@ -4,16 +4,22 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 serve(async (req) => {
+  console.log('Function called with method:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log('Processing request body...');
     const { text, userId = 'anonymous' } = await req.json();
+    console.log('Request data:', { textLength: text?.length, userId });
 
     if (!text || text.trim().length === 0) {
       return new Response(
@@ -29,8 +35,10 @@ serve(async (req) => {
     }
 
     const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+    console.log('OpenAI API key status:', openAIApiKey ? 'Available' : 'Not available');
+    
     if (!openAIApiKey) {
-      console.error('OpenAI API key not found');
+      console.log('Using mock detection due to missing API key');
       // Return mock data if no API key
       const mockResult = generateMockDetection(text);
       return new Response(

@@ -122,6 +122,9 @@ export const useTextOperations = (
     setHumanizationResult(null);
     
     try {
+      console.log('Making API call to:', API_ENDPOINTS.DETECT_AI_TEXT);
+      console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.uid || 'anonymous' });
+      
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
         {
@@ -134,7 +137,9 @@ export const useTextOperations = (
         }
       );
       
+      console.log('API response status:', response.status);
       const responseData = await response.json();
+      console.log('API response data:', responseData);
       
       setDetectionResult(responseData.data);
       
