@@ -8,19 +8,6 @@ export interface SampleText {
 }
 
 export const sampleTexts: SampleText[] = [
-  // Human-written student essays
-  {
-    id: 'human-essay-2', 
-    title: 'Student Essay: Technology and Social Media',
-    text: `I'll be honest - I'm addicted to my phone. Like, seriously addicted. I probably check Instagram about 50 times a day, and don't even get me started on TikTok. My screen time report is embarrassing. But here's the thing that bugs me: everyone acts like social media is this terrible thing that's ruining our generation, and yeah, there are problems, but it's not all bad.
-
-Through Twitter, I learned about the Black Lives Matter protests in my area and actually went to participate. I've connected with other kids who share my interests in astronomy (shoutout to @spacekid2006), and when I was struggling with anxiety last year, finding support groups online literally saved me. My therapist says social media can be a tool, and like any tool, it depends how you use it.
-
-Sure, seeing everyone's perfect vacation photos makes me feel like crap sometimes. And yes, I've fallen down rabbit holes of conspiracy theories that made me paranoid for weeks. But I've also discovered new music, learned about colleges I never would have considered, and stayed connected with my cousin in Japan. I guess what I'm trying to say is that technology isn't inherently good or bad - it's complicated, just like everything else in life.`,
-    expectedType: 'human',
-    source: 'College freshman essay',
-    category: 'essay'
-  },
 
   // AI-generated text from ChatGPT
   {
