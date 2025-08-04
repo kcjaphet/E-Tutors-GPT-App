@@ -10,18 +10,6 @@ export interface SampleText {
 export const sampleTexts: SampleText[] = [
   // Human-written student essays
   {
-    id: 'human-essay-1',
-    title: 'Student Essay: Climate Change Impact',
-    text: `Climate change has become one of the most pressing issues of our time, and honestly, it scares me. Growing up in California, I've witnessed firsthand the devastating effects of wildfires that seem to get worse every year. My family had to evacuate twice during the Camp Fire in 2018, and the experience was terrifying. 
-
-The smoke was so thick you couldn't see across the street, and everything smelled like burning for weeks. What really gets to me is how this affects different communities unequally. My friend Maria's family couldn't afford to leave town during the evacuations, while my neighbors with money just packed up their RVs and headed to their vacation homes.
-
-I think about my little sister a lot when I read about rising sea levels and extreme weather. What kind of world are we leaving for her? Sometimes I feel overwhelmed by the scale of the problem, but then I remember that small actions can make a difference. I've started biking to school instead of asking for rides, and I'm trying to convince my parents to get solar panels. It's not much, but it's something.`,
-    expectedType: 'human',
-    source: 'High school student essay',
-    category: 'essay'
-  },
-  {
     id: 'human-essay-2', 
     title: 'Student Essay: Technology and Social Media',
     text: `I'll be honest - I'm addicted to my phone. Like, seriously addicted. I probably check Instagram about 50 times a day, and don't even get me started on TikTok. My screen time report is embarrassing. But here's the thing that bugs me: everyone acts like social media is this terrible thing that's ruining our generation, and yeah, there are problems, but it's not all bad.
