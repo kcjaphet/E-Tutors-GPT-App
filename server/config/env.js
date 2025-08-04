@@ -24,6 +24,13 @@ const loadEnv = () => {
     'OPENAI_API_KEY'
   ];
   
+  // Optional environment variables with defaults
+  const optionalVars = {
+    'NODE_ENV': 'production',
+    'PORT': '5000',
+    'CORS_ORIGIN': '*'
+  };
+  
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
