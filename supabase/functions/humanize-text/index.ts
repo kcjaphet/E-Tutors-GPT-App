@@ -152,41 +152,76 @@ Return only the humanized text without any explanations or metadata.`
 });
 
 function generateMockHumanization(text: string) {
-  // Simple mock humanization - add some natural elements
+  // Enhanced mock humanization with more noticeable changes
   let humanized = text;
   
-  // Add contractions
-  humanized = humanized.replace(/\b(do not|does not|did not)\b/g, (match) => {
-    return match.replace(' not', "n't");
+  // Add contractions (more comprehensive)
+  humanized = humanized.replace(/\b(do not|does not|did not)\b/gi, (match) => {
+    return match.replace(/ not/i, "n't");
   });
-  humanized = humanized.replace(/\b(will not)\b/g, "won't");
-  humanized = humanized.replace(/\b(cannot)\b/g, "can't");
-  humanized = humanized.replace(/\b(it is)\b/g, "it's");
-  humanized = humanized.replace(/\b(that is)\b/g, "that's");
+  humanized = humanized.replace(/\bwill not\b/gi, "won't");
+  humanized = humanized.replace(/\bcannot\b/gi, "can't");
+  humanized = humanized.replace(/\bit is\b/gi, "it's");
+  humanized = humanized.replace(/\bthat is\b/gi, "that's");
+  humanized = humanized.replace(/\bwe are\b/gi, "we're");
+  humanized = humanized.replace(/\bthey are\b/gi, "they're");
+  humanized = humanized.replace(/\byou are\b/gi, "you're");
+  humanized = humanized.replace(/\bI am\b/gi, "I'm");
+  humanized = humanized.replace(/\bwould not\b/gi, "wouldn't");
+  humanized = humanized.replace(/\bshould not\b/gi, "shouldn't");
+  humanized = humanized.replace(/\bcould not\b/gi, "couldn't");
   
-  // Add some filler words occasionally
-  const fillers = [', you know,', ', actually,', ', honestly,', ', frankly,'];
-  const sentences = humanized.split('. ');
+  // Make formal transitions more conversational
+  humanized = humanized.replace(/\bMoreover,\b/g, 'Plus,');
+  humanized = humanized.replace(/\bFurthermore,\b/g, 'Also,');
+  humanized = humanized.replace(/\bTherefore,\b/g, 'So,');
+  humanized = humanized.replace(/\bHowever,\b/g, 'But,');
+  humanized = humanized.replace(/\bNevertheless,\b/g, 'Still,');
+  humanized = humanized.replace(/\bIn conclusion,\b/g, 'Overall,');
+  humanized = humanized.replace(/\bIn addition,\b/g, 'Also,');
+  humanized = humanized.replace(/\bConsequently,\b/g, 'As a result,');
+  
+  // Replace formal words with casual alternatives
+  humanized = humanized.replace(/\butilize\b/gi, 'use');
+  humanized = humanized.replace(/\bfacilitate\b/gi, 'help');
+  humanized = humanized.replace(/\bdemonstrate\b/gi, 'show');
+  humanized = humanized.replace(/\bimplement\b/gi, 'put in place');
+  humanized = humanized.replace(/\bestablish\b/gi, 'set up');
+  humanized = humanized.replace(/\bmaintain\b/gi, 'keep');
+  humanized = humanized.replace(/\bobtain\b/gi, 'get');
+  humanized = humanized.replace(/\bassist\b/gi, 'help');
+  
+  // Add occasional conversational elements
+  const sentences = humanized.split(/[.!?]+/);
+  const processedSentences = [];
   
   for (let i = 0; i < sentences.length; i++) {
-    if (Math.random() < 0.3 && sentences[i].length > 50) {
-      const filler = fillers[Math.floor(Math.random() * fillers.length)];
-      const words = sentences[i].split(' ');
-      if (words.length > 8) {
-        const insertPos = Math.floor(words.length / 2);
-        words.splice(insertPos, 0, filler);
-        sentences[i] = words.join(' ');
-      }
+    let sentence = sentences[i].trim();
+    if (sentence.length === 0) continue;
+    
+    // Add conversational starters to some sentences
+    if (i > 0 && sentence.length > 30 && Math.random() < 0.4) {
+      const starters = ['Look,', 'Well,', 'You know,', 'Actually,', 'Honestly,'];
+      const starter = starters[Math.floor(Math.random() * starters.length)];
+      sentence = starter + ' ' + sentence.toLowerCase();
     }
+    
+    // Add emphasis words occasionally
+    if (sentence.length > 40 && Math.random() < 0.3) {
+      sentence = sentence.replace(/\bis\b/i, 'really is');
+      sentence = sentence.replace(/\bwill\b/i, 'definitely will');
+      sentence = sentence.replace(/\bcan\b/i, 'can definitely');
+    }
+    
+    processedSentences.push(sentence);
   }
   
-  humanized = sentences.join('. ');
+  humanized = processedSentences.join('. ') + '.';
   
-  // Make some sentences more conversational
-  humanized = humanized.replace(/Moreover,/g, 'Plus,');
-  humanized = humanized.replace(/Furthermore,/g, 'Also,');
-  humanized = humanized.replace(/Therefore,/g, 'So,');
-  humanized = humanized.replace(/In conclusion,/g, 'Overall,');
+  // Fix any double periods or spacing issues
+  humanized = humanized.replace(/\.+/g, '.');
+  humanized = humanized.replace(/\s+/g, ' ');
+  humanized = humanized.trim();
 
   return {
     originalText: text,
@@ -194,6 +229,6 @@ function generateMockHumanization(text: string) {
     textLength: text.length,
     timestamp: new Date().toISOString(),
     resultId: `mock_humanize_${Date.now()}`,
-    note: 'Text humanized using demonstration algorithm. For full AI-powered humanization, OpenAI API key is required.'
+    note: 'Text humanized using demo algorithm. For full AI-powered humanization, please configure OpenAI API key.'
   };
 }
