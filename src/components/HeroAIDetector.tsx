@@ -8,7 +8,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Shield, AlertTriangle, Loader2 } from 'lucide-react';
 import ResultCard from '@/components/dashboard/ResultCard';
-import SampleTextSelector from '@/components/ai-detection/SampleTextSelector';
 
 const HeroAIDetector: React.FC = () => {
   const { currentUser } = useAuth();
@@ -27,10 +26,6 @@ const HeroAIDetector: React.FC = () => {
     humanizeText,
     copyToClipboard
   } = useTextOperations(currentUser, subscription, fetchSubscription);
-
-  const handleSampleSelect = (text: string, expectedType: 'human' | 'ai') => {
-    handleTextChange(text);
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -108,9 +103,6 @@ const HeroAIDetector: React.FC = () => {
           inputText={inputText}
         />
       )}
-
-      {/* Sample Text Selector - Now at the bottom */}
-      <SampleTextSelector onSampleSelect={handleSampleSelect} />
     </div>
   );
 };
