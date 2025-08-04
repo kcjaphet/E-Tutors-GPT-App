@@ -3,16 +3,16 @@
  * Configuration file for API endpoints
  */
 
-// Use environment variable for API URL with fallback
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Use Supabase Edge Functions
+export const API_BASE_URL = 'https://jusuwufpgirouvyrmaxe.supabase.co/functions/v1';
 
 // API endpoints
 export const API_ENDPOINTS = {
-  DETECT_AI_TEXT: `${API_BASE_URL}/api/detect-ai-text`,
-  HUMANIZE_TEXT: `${API_BASE_URL}/api/humanize-text`,
-  LITERATURE_REVIEW: `${API_BASE_URL}/api/literature-review`,
-  TEXT_PROCESS: `${API_BASE_URL}/api/text-process`,
-  PDF_SUMMARY: `${API_BASE_URL}/api/pdf-summary`,
+  DETECT_AI_TEXT: `${API_BASE_URL}/detect-ai-text`,
+  HUMANIZE_TEXT: `${API_BASE_URL}/humanize-text`,
+  LITERATURE_REVIEW: `${API_BASE_URL}/literature-review`,
+  TEXT_PROCESS: `${API_BASE_URL}/text-process`,
+  PDF_SUMMARY: `${API_BASE_URL}/pdf-summary`,
   AUTH: {
     SIGNUP: `${API_BASE_URL}/api/auth/signup`,
     LOGIN: `${API_BASE_URL}/api/auth/login`,

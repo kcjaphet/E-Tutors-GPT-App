@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { API_BASE_URL, API_CONFIG } from '@/config/api';
+import { API_BASE_URL, API_CONFIG, API_ENDPOINTS } from '@/config/api';
 
 export interface HumanizationResult {
   originalText: string;
@@ -75,7 +75,7 @@ export const useHumanization = () => {
     
     try {
       const response = await fetchWithRetry(
-        `${API_BASE_URL}/api/humanize-text`,
+        API_ENDPOINTS.HUMANIZE_TEXT,
         {
           method: 'POST',
           headers: API_CONFIG.HEADERS,

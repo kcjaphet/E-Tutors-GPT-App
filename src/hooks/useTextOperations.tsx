@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Subscription } from './useSubscription';
 import { useHumanization } from './useHumanization';
-import { API_BASE_URL, API_CONFIG } from '@/config/api';
+import { API_BASE_URL, API_CONFIG, API_ENDPOINTS } from '@/config/api';
 
 export interface DetectionResult {
   aiProbability: number;
@@ -123,7 +123,7 @@ export const useTextOperations = (
     
     try {
       const response = await fetchWithRetry(
-        `${API_BASE_URL}/api/detect-ai-text`, 
+        API_ENDPOINTS.DETECT_AI_TEXT, 
         {
           method: 'POST',
           headers: API_CONFIG.HEADERS,
