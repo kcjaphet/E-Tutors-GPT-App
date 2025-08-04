@@ -20,16 +20,16 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-3 mb-8">
-        <TabsTrigger value="check-text" className="flex items-center gap-2">
-          <Search className="w-4 h-4" />
+        <TabsTrigger value="check-text" className="flex items-center gap-2 text-lg font-bold">
+          <Search className="w-5 h-5" />
           Check Text
         </TabsTrigger>
-        <TabsTrigger value="get-report" className="flex items-center gap-2">
-          <BarChart3 className="w-4 h-4" />
+        <TabsTrigger value="get-report" className="flex items-center gap-2 text-lg font-bold">
+          <BarChart3 className="w-5 h-5" />
           Get Report
         </TabsTrigger>
-        <TabsTrigger value="learn-more" className="flex items-center gap-2">
-          <BookOpen className="w-4 h-4" />
+        <TabsTrigger value="learn-more" className="flex items-center gap-2 text-lg font-bold">
+          <BookOpen className="w-5 h-5" />
           Learn More
         </TabsTrigger>
       </TabsList>
