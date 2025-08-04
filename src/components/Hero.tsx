@@ -32,13 +32,13 @@ const Hero: React.FC = () => {
           
           <div className="animate-in stagger-4 flex flex-col sm:flex-row gap-4">
             <Link 
-              to="/tools" 
+              to="/ai-detection" 
               className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/90 focus-ring"
             >
               Try it now
             </Link>
             <Link 
-              to="/about" 
+              to="/products" 
               className="inline-flex h-12 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-lg transition-colors hover:bg-secondary focus-ring"
             >
               Learn more
