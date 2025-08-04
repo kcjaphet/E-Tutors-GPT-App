@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PricingHeader from '@/components/pricing/PricingHeader';
@@ -47,31 +48,24 @@ const Pricing: React.FC = () => {
         return;
       }
 
-      // For premium or pro plans, call the checkout endpoint
-      const response = await fetch(`${API_BASE_URL}/api/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: currentUser.id,
+      // For premium or pro plans, call the checkout edge function
+      const { data: sessionData, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
           planType: planId,
           successUrl: `${window.location.origin}/subscription-success`,
           cancelUrl: `${window.location.origin}/pricing`,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      if (error) {
+        throw new Error(error.message || 'Failed to create checkout session');
       }
       
-      const data = await response.json();
-      console.log("Checkout response:", data);
+      console.log("Checkout response:", sessionData);
       
       // Important: directly redirect to Stripe checkout URL
-      if (data.success && data.url) {
-        window.location.href = data.url;
+      if (sessionData.success && sessionData.url) {
+        window.location.href = sessionData.url;
       } else {
         throw new Error('Failed to create checkout session');
       }
