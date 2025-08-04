@@ -20,7 +20,7 @@ export const tools: Tool[] = [
     title: 'AI Detector',
     description: 'Detect if text was written by AI or a human',
     icon: <Shield className="w-5 h-5" />,
-    linkTo: '/dashboard',
+    linkTo: '/ai-detection',
     prompt: ''
   },
   {
@@ -28,7 +28,7 @@ export const tools: Tool[] = [
     title: 'AI Humanizer',
     description: 'Make AI-generated text read more like human writing',
     icon: <User className="w-5 h-5" />,
-    linkTo: '/dashboard',
+    linkTo: '/ai-detection',
     prompt: ''
   },
   {

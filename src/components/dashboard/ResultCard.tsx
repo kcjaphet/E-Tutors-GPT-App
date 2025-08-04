@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, AlertTriangle, Shield, Brain } from 'lucide-react';
+import DetectionChart from '@/components/ai-detection/DetectionChart';
 
 interface DetectionResult {
   aiProbability: number;
@@ -125,6 +126,12 @@ const ResultCard: React.FC<ResultCardProps> = ({
                 />
               </div>
             </div>
+
+            {/* Chart Visualization */}
+            <DetectionChart 
+              aiProbability={detectionResult.aiProbability}
+              confidenceLevel={detectionResult.confidenceLevel}
+            />
 
             {/* Detailed Reasoning */}
             {detectionResult.reasoning && (
