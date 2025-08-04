@@ -33,7 +33,7 @@ const Pricing: React.FC = () => {
           description: "Please log in or sign up to subscribe to a plan",
           variant: "destructive"
         });
-        navigate('/login');
+        navigate('/auth');
         return;
       }
 
@@ -54,7 +54,7 @@ const Pricing: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: currentUser.uid,
+          userId: currentUser.id,
           planType: planId,
           successUrl: `${window.location.origin}/subscription-success`,
           cancelUrl: `${window.location.origin}/pricing`,

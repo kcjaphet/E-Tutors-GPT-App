@@ -1,20 +1,14 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { API_BASE_URL, API_ENDPOINTS } from "@/config/api";
+import { supabase } from "@/integrations/supabase/client";
+import type { User, Session } from '@supabase/supabase-js';
 import { useToast } from "@/components/ui/use-toast";
-
-interface User {
-  _id: string;
-  email: string;
-  displayName?: string;
-  uid: string;
-}
 
 interface AuthContextType {
   currentUser: User | null;
+  session: Session | null;
   loading: boolean;
-  signup: (email: string, password: string, name: string) => Promise<User>;
-  login: (email: string, password: string) => Promise<User>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -31,45 +25,53 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (user) {
-      setCurrentUser(JSON.parse(user));
-    }
-    setLoading(false);
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setCurrentUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setCurrentUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   // Sign up function
-  const signup = async (email: string, password: string, name: string): Promise<User> => {
+  const signup = async (email: string, password: string, name: string): Promise<void> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password, displayName: name }),
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            display_name: name,
+            name: name
+          }
+        }
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create account");
-      }
-
-      const user = data.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
+      if (error) throw error;
       
       toast({
         title: "Account created",
-        description: "Your account has been successfully created!"
+        description: "Please check your email to confirm your account!"
       });
-      
-      return user;
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -81,32 +83,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Login function
-  const login = async (email: string, password: string): Promise<User> => {
+  const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid credentials");
-      }
-
-      const user = data.user;
-      localStorage.setItem("user", JSON.stringify(user));
-      setCurrentUser(user);
+      if (error) throw error;
       
       toast({
         title: "Welcome back!",
         description: "You've successfully logged in."
       });
-      
-      return user;
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -120,8 +109,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Logout function
   const logout = async (): Promise<void> => {
     try {
-      localStorage.removeItem("user");
-      setCurrentUser(null);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
       
       toast({
         title: "Logged out",
@@ -140,19 +130,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Reset password function
   const resetPassword = async (email: string): Promise<void> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email }),
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl,
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send reset email");
-      }
+      if (error) throw error;
       
       toast({
         title: "Password reset email sent",
@@ -170,6 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     currentUser,
+    session,
     loading,
     signup,
     login,

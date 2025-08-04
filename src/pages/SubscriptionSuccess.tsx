@@ -22,7 +22,7 @@ const SubscriptionSuccess: React.FC = () => {
   
   // If not logged in, redirect to login
   if (!currentUser) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/auth" />;
   }
   
   return (

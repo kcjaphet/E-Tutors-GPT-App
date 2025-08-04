@@ -49,7 +49,7 @@ const AIDetection: React.FC = () => {
   
   // Redirect if not logged in
   if (!currentUser) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/auth" />;
   }
 
   const remaining = getRemainingUsage();

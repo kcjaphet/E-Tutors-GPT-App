@@ -26,7 +26,7 @@ export const useSubscription = () => {
     
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/subscription/${currentUser.uid}`);
+      const response = await fetch(`${API_BASE_URL}/api/subscription/${currentUser.id}`);
       const data = await response.json();
       
       if (data.success) {

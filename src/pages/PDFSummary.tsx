@@ -61,8 +61,8 @@ const PDFSummary: React.FC = () => {
       const formData = new FormData();
       formData.append('pdfFile', file);
       
-      if (currentUser?.uid) {
-        formData.append('userId', currentUser.uid);
+      if (currentUser?.id) {
+        formData.append('userId', currentUser.id);
       }
       
       const response = await fetch(API_ENDPOINTS.PDF_SUMMARY, {

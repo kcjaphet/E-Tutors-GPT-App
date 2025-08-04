@@ -14,7 +14,7 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      navigate('/auth');
     } catch (error) {
       console.error("Failed to log out", error);
     }
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
           {currentUser ? (
             <div className="flex items-center gap-4">
               <div className="text-sm hidden md:block">
-                Hello, {currentUser.displayName || currentUser.email}
+                Hello, {currentUser.user_metadata?.display_name || currentUser.email}
               </div>
               <Button
                 variant="ghost"
@@ -91,14 +91,14 @@ const Header: React.FC = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth?mode=login')}
                 className="text-sm"
               >
                 Login
               </Button>
               <Button
                 size="sm"
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/auth?mode=signup')}
                 className="text-sm"
               >
                 Sign up

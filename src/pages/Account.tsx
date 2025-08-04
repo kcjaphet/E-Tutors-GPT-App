@@ -19,7 +19,7 @@ const Account = () => {
   
   // Redirect if not signed in
   if (!currentUser) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/auth" />;
   }
 
   // Handle subscription cancellation
@@ -31,7 +31,7 @@ const Account = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: currentUser.uid
+          userId: currentUser.id
         }),
       });
       
