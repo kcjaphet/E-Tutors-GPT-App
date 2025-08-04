@@ -9,40 +9,6 @@ export interface SampleText {
 
 export const sampleTexts: SampleText[] = [
 
-  // AI-generated text from ChatGPT
-  {
-    id: 'ai-essay-1',
-    title: 'AI-Generated: Climate Change Analysis',
-    text: `Climate change represents one of the most significant challenges facing humanity in the 21st century. The scientific consensus is clear: human activities, particularly the emission of greenhouse gases from fossil fuel combustion, are driving unprecedented changes in Earth's climate system.
-
-The impacts of climate change are multifaceted and far-reaching. Rising global temperatures have led to the melting of polar ice caps, resulting in sea-level rise that threatens coastal communities worldwide. Additionally, we observe increased frequency and intensity of extreme weather events, including hurricanes, droughts, and heatwaves, which have profound socioeconomic implications.
-
-From an environmental perspective, climate change disrupts ecosystems and biodiversity. Many species face extinction as their habitats undergo rapid transformation. Ocean acidification, caused by increased CO2 absorption, threatens marine life and fisheries that millions depend upon for sustenance and livelihood.
-
-Addressing climate change requires comprehensive, coordinated action across multiple sectors. Governments must implement robust policy frameworks, including carbon pricing mechanisms and renewable energy incentives. Simultaneously, technological innovation in clean energy, energy storage, and carbon capture technologies will be crucial for achieving emission reduction targets.
-
-Individual actions, while important, must be complemented by systemic changes to achieve meaningful impact. The transition to a sustainable future demands unprecedented cooperation between nations, industries, and communities.`,
-    expectedType: 'ai',
-    source: 'ChatGPT-4',
-    category: 'essay'
-  },
-  {
-    id: 'ai-essay-2',
-    title: 'AI-Generated: Technology in Education',
-    text: `The integration of technology in educational environments has fundamentally transformed the landscape of learning and instruction. Digital tools and platforms have created unprecedented opportunities for personalized learning experiences, enabling educators to tailor content delivery to individual student needs and learning styles.
-
-Modern educational technology encompasses a wide range of applications, from interactive whiteboards and learning management systems to artificial intelligence-powered tutoring platforms. These tools facilitate enhanced engagement through multimedia content, gamification elements, and real-time feedback mechanisms that support continuous learning improvement.
-
-Research indicates that technology-enhanced learning environments can improve student outcomes across various metrics. Studies demonstrate increased retention rates, improved critical thinking skills, and enhanced collaboration capabilities among students who engage with digital learning platforms regularly.
-
-However, the implementation of educational technology also presents certain challenges. Digital equity concerns arise when students lack access to necessary devices or reliable internet connectivity. Additionally, educators require comprehensive professional development to effectively integrate technological tools into their pedagogical practices.
-
-The future of education will likely involve further integration of emerging technologies such as virtual reality, augmented reality, and machine learning algorithms. These innovations promise to create even more immersive and personalized learning experiences while addressing current limitations in educational delivery methods.`,
-    expectedType: 'ai',
-    source: 'ChatGPT-4',
-    category: 'essay'
-  },
-
   // Creative writing samples
   {
     id: 'human-creative-1',
