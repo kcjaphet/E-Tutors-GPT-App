@@ -7,7 +7,7 @@ import SubscriptionCard from '@/components/dashboard/SubscriptionCard';
 import TextInputCard from '@/components/dashboard/TextInputCard';
 import ResultCard from '@/components/dashboard/ResultCard';
 import NavigationTabs from '@/components/ai-detection/NavigationTabs';
-import SampleTextSelector from '@/components/ai-detection/SampleTextSelector';
+
 import LearnMoreSection from '@/components/ai-detection/LearnMoreSection';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useTextOperations } from '@/hooks/useTextOperations';
@@ -86,9 +86,6 @@ const AIDetection: React.FC = () => {
         subscription={subscription} 
         isLoadingSubscription={isLoadingSubscription} 
       />
-
-      {/* Sample Text Selector */}
-      <SampleTextSelector onSampleSelect={handleSampleSelect} />
       
       {/* Text input card */}
       <TextInputCard 
