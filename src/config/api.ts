@@ -22,8 +22,8 @@ export const API_ENDPOINTS = {
 
 // API request configuration
 export const API_CONFIG = {
-  TIMEOUT: 60000, // 60 seconds timeout
-  RETRY_ATTEMPTS: 3,
+  TIMEOUT: 30000, // 30 seconds timeout
+  RETRY_ATTEMPTS: 2,
   HEADERS: {
     'Content-Type': 'application/json',
   }
