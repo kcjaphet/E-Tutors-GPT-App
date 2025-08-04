@@ -97,10 +97,7 @@ const HeroAIDetector: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Sample Text Selector - Now below the input */}
-      <SampleTextSelector onSampleSelect={handleSampleSelect} />
-
-      {/* Results Display */}
+      {/* Results Display - Now directly under the detector */}
       {(detectionResult || humanizationResult) && (
         <ResultCard 
           resultText={resultText}
@@ -111,6 +108,9 @@ const HeroAIDetector: React.FC = () => {
           inputText={inputText}
         />
       )}
+
+      {/* Sample Text Selector - Now at the bottom */}
+      <SampleTextSelector onSampleSelect={handleSampleSelect} />
     </div>
   );
 };
