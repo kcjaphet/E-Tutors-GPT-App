@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import HeroAIDetector from './HeroAIDetector';
 
 const Hero: React.FC = () => {
   return (
@@ -45,25 +46,14 @@ const Hero: React.FC = () => {
             </Link>
           </div>
           
-          <div className="w-full max-w-4xl animate-in stagger-5">
-            <div className="relative h-[300px] md:h-[400px] w-full overflow-hidden rounded-lg bg-card shadow-xl border border-border">
-              <div className="absolute inset-0 p-6 flex items-center justify-center">
-                <div className="w-full max-w-2xl bg-background rounded-lg p-6 shadow-lg">
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="w-3 h-3 rounded-full bg-red-500" />
-                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                      <div className="w-3 h-3 rounded-full bg-green-500" />
-                    </div>
-                    <div className="h-6 w-4/5 bg-muted rounded animate-pulse"></div>
-                    <div className="h-6 w-full bg-muted rounded animate-pulse"></div>
-                    <div className="h-6 w-3/5 bg-muted rounded animate-pulse"></div>
-                    <div className="h-12 w-full mt-6 bg-primary/20 rounded animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="w-full max-w-4xl animate-in stagger-5"
+          >
+            <HeroAIDetector />
+          </motion.div>
         </div>
       </div>
     </section>
