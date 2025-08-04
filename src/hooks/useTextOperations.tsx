@@ -142,6 +142,7 @@ export const useTextOperations = (
       console.log('API response data:', responseData);
       
       setDetectionResult(responseData.data);
+      console.log('Detection result set:', responseData.data);
       
       // Format result for display - now handled by ResultCard component
       setResultText("AI Detection Complete");
