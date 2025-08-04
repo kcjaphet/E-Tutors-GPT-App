@@ -4,12 +4,59 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+const { validateEmail, validatePassword, sanitizeInput } = require('../middleware/validation');
+
+// Rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again later'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const resetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 3, // Limit each IP to 3 password reset requests per hour
+  message: {
+    success: false,
+    message: 'Too many password reset attempts, please try again later'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Register a new user
-router.post('/signup', async (req, res) => {
+router.post('/signup', authLimiter, async (req, res) => {
   try {
-    const { email, password, displayName } = req.body;
+    let { email, password, displayName } = req.body;
+    
+    // Sanitize inputs
+    email = sanitizeInput(email);
+    displayName = sanitizeInput(displayName);
+    
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: emailValidation.message 
+      });
+    }
+    
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: passwordValidation.message 
+      });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -33,10 +80,15 @@ router.post('/signup', async (req, res) => {
 
     await user.save();
 
+    // Ensure JWT_SECRET is set
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+    
     // Create JWT token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || 'default_jwt_secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -61,9 +113,20 @@ router.post('/signup', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    
+    // Sanitize inputs
+    email = sanitizeInput(email);
+    
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email and password are required' 
+      });
+    }
 
     // Find user
     const user = await User.findOne({ email });
@@ -83,10 +146,15 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Ensure JWT_SECRET is set
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+    
     // Create JWT token
     const token = jwt.sign(
       { userId: user._id },
-      process.env.JWT_SECRET || 'default_jwt_secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -111,10 +179,21 @@ router.post('/login', async (req, res) => {
 });
 
 // Reset password request
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', resetLimiter, async (req, res) => {
   try {
-    const { email } = req.body;
-    console.log('Password reset requested for:', email);
+    let { email } = req.body;
+    
+    // Sanitize input
+    email = sanitizeInput(email);
+    
+    // Validate email
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: emailValidation.message 
+      });
+    }
 
     // Check if user exists
     const user = await User.findOne({ email });
@@ -133,20 +212,13 @@ router.post('/reset-password', async (req, res) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
-    
-    console.log(`Reset token generated and saved for user: ${email}, token: ${resetToken}`);
 
     // In a real application, you'd send an email with the reset link
-    // For this example, we'll simulate success and log the token
+    // For this example, we'll simulate success
     
     res.status(200).json({
       success: true,
-      message: 'If your email is registered, you will receive a reset link',
-      // Do not include this in production, for demonstration only
-      debug: {
-        resetToken,
-        userId: user._id
-      }
+      message: 'If your email is registered, you will receive a reset link'
     });
   } catch (error) {
     console.error('Password reset error:', error);
@@ -158,9 +230,26 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // Create an endpoint to verify token and reset password
-router.post('/reset-password/confirm', async (req, res) => {
+router.post('/reset-password/confirm', resetLimiter, async (req, res) => {
   try {
     const { token, password } = req.body;
+    
+    // Validate inputs
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Token and password are required'
+      });
+    }
+    
+    // Validate new password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({ 
+        success: false, 
+        message: passwordValidation.message 
+      });
+    }
     
     // Find user with this token and check expiration
     const user = await User.findOne({

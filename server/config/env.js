@@ -21,7 +21,8 @@ const loadEnv = () => {
   // Validate required environment variables
   const requiredVars = [
     'MONGO_URI',
-    'OPENAI_API_KEY'
+    'OPENAI_API_KEY',
+    'JWT_SECRET'
   ];
   
   // Optional environment variables with defaults
@@ -34,13 +35,9 @@ const loadEnv = () => {
   const missingVars = requiredVars.filter(varName => !process.env[varName]);
   
   if (missingVars.length > 0) {
-    console.warn(`Warning: Missing required environment variables: ${missingVars.join(', ')}`);
-    console.warn('Make sure to set these before using the API in production mode.');
-    // Set default MongoDB URI if it's missing
-    if (missingVars.includes('MONGO_URI')) {
-      process.env.MONGO_URI = 'mongodb+srv://etutorsDB_admin:mymama123%40@cluster0.yoxj8bn.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
-      console.log('Using default MongoDB URI');
-    }
+    console.error(`Error: Missing required environment variables: ${missingVars.join(', ')}`);
+    console.error('These environment variables must be set before starting the application.');
+    process.exit(1);
   } else {
     console.log('All required environment variables are set');
   }
