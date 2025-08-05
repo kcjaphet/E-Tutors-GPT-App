@@ -31,7 +31,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
           <BarChart3 className="w-5 h-5 text-red-600" />
           Get Report
           <MousePointer 
-            className="w-5 h-5 text-red-500 ml-6"
+            className="w-10 h-10 text-red-500 ml-6"
             style={{ 
               transform: 'rotate(-15deg)',
               animation: 'pointing-motion 2s ease-in-out infinite, flash 3s infinite'
