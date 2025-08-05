@@ -74,11 +74,18 @@ export const useHumanization = () => {
     setHumanizationResult(null);
     
     try {
+      // Get auth token from Supabase
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data: { session } } = await supabase.auth.getSession();
+      const authHeaders = session?.access_token 
+        ? { ...API_CONFIG.HEADERS, Authorization: `Bearer ${session.access_token}` }
+        : API_CONFIG.HEADERS;
+
       const response = await fetchWithRetry(
         API_ENDPOINTS.HUMANIZE_TEXT,
         {
           method: 'POST',
-          headers: API_CONFIG.HEADERS,
+          headers: authHeaders,
           body: JSON.stringify({ 
             text: inputText,
             userId

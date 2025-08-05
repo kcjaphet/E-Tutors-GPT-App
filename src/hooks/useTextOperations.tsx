@@ -125,11 +125,17 @@ export const useTextOperations = (
       console.log('Making API call to:', API_ENDPOINTS.DETECT_AI_TEXT);
       console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.uid || 'anonymous' });
       
+      // Get auth token from Supabase
+      const { data: { session } } = await import('@/integrations/supabase/client').then(m => m.supabase.auth.getSession());
+      const authHeaders = session?.access_token 
+        ? { ...API_CONFIG.HEADERS, Authorization: `Bearer ${session.access_token}` }
+        : API_CONFIG.HEADERS;
+
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
         {
           method: 'POST',
-          headers: API_CONFIG.HEADERS,
+          headers: authHeaders,
           body: JSON.stringify({ 
             text: inputText,
             userId: currentUser?.uid || 'anonymous'
