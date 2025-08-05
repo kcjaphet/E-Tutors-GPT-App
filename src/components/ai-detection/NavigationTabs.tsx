@@ -30,7 +30,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
         >
           <BarChart3 className="w-5 h-5 text-red-600" />
           Get Report
-          <div className="absolute -right-2 -top-1">
+          <div className="absolute right-1 top-0">
             <MousePointer 
               className="w-5 h-5 text-red-500"
               style={{ 
