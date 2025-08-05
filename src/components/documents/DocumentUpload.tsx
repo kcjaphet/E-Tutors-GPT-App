@@ -17,15 +17,25 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
   const { t } = useTranslation();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    console.log('Upload started with files:', acceptedFiles);
+    console.log('=== DocumentUpload: Starting upload process ===');
+    console.log('Files dropped:', acceptedFiles);
     
-    if (acceptedFiles.length === 0) return;
+    if (acceptedFiles.length === 0) {
+      console.log('No files accepted');
+      return;
+    }
     
     const file = acceptedFiles[0];
-    console.log('Processing file:', file.name, file.size, file.type);
+    console.log('File details:', {
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      lastModified: file.lastModified
+    });
     
     // Validate file size (50MB limit)
     if (file.size > 52428800) {
+      console.log('File too large:', file.size);
       toast({
         title: "Error",
         description: "File size must be less than 50MB",
@@ -35,18 +45,20 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
     }
 
     setIsUploading(true);
+    console.log('Upload started');
 
     try {
       // Get current user
-      console.log('Getting user authentication...');
+      console.log('Getting current user...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
       if (authError) {
         console.error('Auth error:', authError);
         throw authError;
       }
+      
       if (!user) {
-        console.error('No authenticated user found');
+        console.error('No user found');
         throw new Error('Authentication required');
       }
       
@@ -57,54 +69,73 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
       
-      console.log('Uploading to storage path:', filePath);
+      console.log('File path:', filePath);
 
       // Upload file to storage
+      console.log('Uploading to storage...');
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file);
 
       if (uploadError) {
-        console.error('Storage upload failed:', uploadError);
+        console.error('Storage upload error:', uploadError);
         throw uploadError;
       }
       
       console.log('Storage upload successful:', uploadData);
 
       // Create document record
+      console.log('Creating document record...');
+      const documentInsert = {
+        user_id: user.id,
+        title: file.name.replace(/\.[^/.]+$/, ''), // Remove extension
+        file_name: file.name,
+        file_path: uploadData.path,
+        file_size: file.size,
+        mime_type: file.type,
+        status: 'processing'
+      };
+      
+      console.log('Document insert data:', documentInsert);
+      
       const { data: documentData, error: docError } = await supabase
         .from('documents')
-        .insert({
-          user_id: user.id,
-          title: file.name.replace(/\.[^/.]+$/, ''),
-          file_name: file.name,
-          file_path: uploadData.path,
-          file_size: file.size,
-          mime_type: file.type,
-          status: 'processing'
-        })
+        .insert(documentInsert)
         .select()
         .single();
 
-      if (docError) throw docError;
+      if (docError) {
+        console.error('Document creation error:', docError);
+        throw docError;
+      }
+      
+      console.log('Document created successfully:', documentData);
 
-      // Process document to extract text
+      // Process document to extract text with authentication
+      console.log('Getting session for processing...');
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (session?.access_token) {
-        const { error: processError } = await supabase.functions.invoke('process-document', {
-          body: { documentId: documentData.id },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+      if (!session?.access_token) {
+        console.error('No access token found');
+        throw new Error('Authentication session required');
+      }
+      
+      console.log('Session found, invoking process-document function...');
+      const { data: processData, error: processError } = await supabase.functions.invoke('process-document', {
+        body: { documentId: documentData.id },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-        // Don't throw processing errors - document is uploaded
-        if (processError) {
-          console.warn('Processing error:', processError);
-        }
+      if (processError) {
+        console.error('Processing error:', processError);
+        // Don't throw here - document is uploaded, processing can be retried
+      } else {
+        console.log('Processing successful:', processData);
       }
 
+      console.log('Upload complete, showing success toast');
       toast({
         title: "Success",
         description: "Document uploaded successfully",
@@ -113,6 +144,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
       onUploadComplete();
 
     } catch (error) {
+      console.error('=== Upload error occurred ===', error);
       toast({
         title: "Error",
         description: error.message || "Failed to upload document",
@@ -120,6 +152,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
       });
     } finally {
       setIsUploading(false);
+      console.log('=== Upload process finished ===');
     }
   }, [toast, onUploadComplete]);
 

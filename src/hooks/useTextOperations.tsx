@@ -152,11 +152,6 @@ export const useTextOperations = (
       const responseData = await response.json();
       console.log('API response data:', responseData);
       
-      // Check if the response was successful
-      if (!responseData.success) {
-        throw new Error(responseData.message || 'Detection failed');
-      }
-      
       setDetectionResult(responseData.data);
       console.log('Detection result set:', responseData.data);
       
