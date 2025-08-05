@@ -19,8 +19,5 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "env": {
-    "VITE_API_URL": "https://gpt-text-tools-api.onrender.com"
-  }
+  ]
 }
