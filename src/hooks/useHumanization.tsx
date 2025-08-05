@@ -81,6 +81,11 @@ export const useHumanization = () => {
         ? { ...API_CONFIG.HEADERS, Authorization: `Bearer ${session.access_token}` }
         : API_CONFIG.HEADERS;
 
+      console.log('Auth headers for humanization:', { 
+        hasToken: !!session?.access_token, 
+        userId: userId 
+      });
+
       const response = await fetchWithRetry(
         API_ENDPOINTS.HUMANIZE_TEXT,
         {

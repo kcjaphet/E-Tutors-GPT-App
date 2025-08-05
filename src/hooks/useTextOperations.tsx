@@ -131,6 +131,11 @@ export const useTextOperations = (
         ? { ...API_CONFIG.HEADERS, Authorization: `Bearer ${session.access_token}` }
         : API_CONFIG.HEADERS;
 
+      console.log('Auth headers for AI detection:', { 
+        hasToken: !!session?.access_token, 
+        userId: currentUser?.uid || 'anonymous' 
+      });
+
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
         {
