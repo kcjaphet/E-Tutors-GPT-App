@@ -1,10 +1,31 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
+// Rate limiting store (in production, use Redis or similar)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+const checkRateLimit = (userId: string, limit: number = 15, windowMs: number = 60000) => {
+  const now = Date.now();
+  const userLimit = rateLimitStore.get(userId);
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitStore.set(userId, { count: 1, resetTime: now + windowMs });
+    return true;
+  }
+  
+  if (userLimit.count >= limit) {
+    return false;
+  }
+  
+  userLimit.count++;
+  return true;
 };
 
 serve(async (req) => {
@@ -17,9 +38,50 @@ serve(async (req) => {
   }
 
   try {
+    // Authentication check
+    const authHeader = req.headers.get('authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Authentication required' 
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Invalid authentication' 
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Rate limiting
+    if (!checkRateLimit(user.id, 15, 60000)) { // 15 requests per minute
+      return new Response(JSON.stringify({ 
+        success: false, 
+        message: 'Rate limit exceeded. Please try again later.' 
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     console.log('Processing humanize request body...');
-    const { text, userId = 'anonymous' } = await req.json();
-    console.log('Humanize request data:', { textLength: text?.length, userId });
+    const { text } = await req.json();
+    console.log('Humanize request data:', { textLength: text?.length, userId: user.id });
 
     if (!text || text.trim().length === 0) {
       return new Response(

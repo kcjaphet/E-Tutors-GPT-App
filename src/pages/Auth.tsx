@@ -23,13 +23,14 @@ const Auth: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') || 'login';
+  const returnTo = searchParams.get('returnTo') || '/';
 
   // Redirect if already authenticated
   useEffect(() => {
     if (currentUser) {
-      navigate("/");
+      navigate(returnTo);
     }
-  }, [currentUser, navigate]);
+  }, [currentUser, navigate, returnTo]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +74,7 @@ const Auth: React.FC = () => {
     try {
       setLoading(true);
       await login(email, password);
-      navigate("/");
+      navigate(returnTo);
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {
