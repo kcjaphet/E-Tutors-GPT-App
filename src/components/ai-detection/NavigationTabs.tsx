@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, BarChart3, BookOpen, Hand } from 'lucide-react';
+import { Search, BarChart3, BookOpen, MousePointer } from 'lucide-react';
 
 interface NavigationTabsProps {
   activeTab: string;
@@ -30,11 +30,11 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
         >
           <BarChart3 className="w-5 h-5 text-red-600" />
           Get Report
-          <div className="absolute -right-8 -top-2">
-            <Hand 
-              className="w-6 h-6 text-red-500"
+          <div className="absolute -right-2 -top-1">
+            <MousePointer 
+              className="w-5 h-5 text-red-500"
               style={{ 
-                transform: 'rotate(-30deg)',
+                transform: 'rotate(-15deg)',
                 animation: 'pointing-motion 2s ease-in-out infinite, flash 3s infinite'
               }}
             />
