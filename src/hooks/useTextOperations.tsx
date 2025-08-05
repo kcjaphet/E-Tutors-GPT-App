@@ -152,8 +152,13 @@ export const useTextOperations = (
       const responseData = await response.json();
       console.log('API response data:', responseData);
       
-      setDetectionResult(responseData.data);
-      console.log('Detection result set:', responseData.data);
+      if (responseData.success && responseData.data) {
+        setDetectionResult(responseData.data);
+        console.log('Detection result set:', responseData.data);
+      } else {
+        console.error('Invalid response structure:', responseData);
+        throw new Error(responseData.message || 'Invalid response from detection service');
+      }
       
       // Format result for display - now handled by ResultCard component
       setResultText("AI Detection Complete");
