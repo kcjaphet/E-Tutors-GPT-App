@@ -47,13 +47,6 @@ export type Database = {
             referencedRelation: "documents"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_conversations_document_id"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
         ]
       }
       documents: {
