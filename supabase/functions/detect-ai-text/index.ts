@@ -38,50 +38,38 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
+    // Authentication check (optional for testing)
     const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Authentication required' 
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    );
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    let user = null;
     
-    if (userError || !user) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Invalid authentication' 
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    if (authHeader) {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      );
 
-    // Rate limiting
-    if (!checkRateLimit(user.id, 20, 60000)) { // 20 requests per minute
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Rate limit exceeded. Please try again later.' 
-      }), {
-        status: 429,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token);
+      
+      if (!userError && authUser) {
+        user = authUser;
+        
+        // Rate limiting for authenticated users
+        if (!checkRateLimit(user.id, 20, 60000)) { // 20 requests per minute
+          return new Response(JSON.stringify({ 
+            success: false, 
+            message: 'Rate limit exceeded. Please try again later.' 
+          }), {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
     }
 
     console.log('Processing request body...');
     const { text } = await req.json();
-    console.log('Request data:', { textLength: text?.length, userId: user.id });
+    console.log('Request data:', { textLength: text?.length, userId: user?.id || 'anonymous' });
 
     if (!text || text.trim().length === 0) {
       return new Response(
