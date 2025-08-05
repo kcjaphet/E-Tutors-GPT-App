@@ -12,9 +12,7 @@ export const API_ENDPOINTS = {
   HUMANIZE_TEXT: `${API_BASE_URL}/humanize-text`,
   LITERATURE_REVIEW: `${API_BASE_URL}/literature-review`,
   TEXT_PROCESS: `${API_BASE_URL}/text-process`,
-  PDF_SUMMARY: `${API_BASE_URL}/pdf-summary`,
-  DOCUMENT_UPLOAD: `${API_BASE_URL}/document-upload`,
-  DOCUMENT_CHAT: `${API_BASE_URL}/document-chat`
+  PDF_SUMMARY: `${API_BASE_URL}/pdf-summary`
 };
 
 // API request configuration

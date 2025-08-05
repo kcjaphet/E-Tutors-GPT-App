@@ -11,8 +11,7 @@ import {
   BookText,
   Shield,
   User,
-  FileUp,
-  MessageCircle
+  FileUp
 } from 'lucide-react';
 
 export const tools: Tool[] = [
@@ -38,14 +37,6 @@ export const tools: Tool[] = [
     description: 'Extract and summarize content from PDF files',
     icon: <FileUp className="w-5 h-5" />,
     linkTo: '/pdf-summary',
-    prompt: ''
-  },
-  {
-    id: 'document-chat',
-    title: 'AI Document Chat',
-    description: 'Chat with your documents using AI - PDF, TXT, PPT, DOCX and more',
-    icon: <MessageCircle className="w-5 h-5" />,
-    linkTo: '/document-chat',
     prompt: ''
   },
   {

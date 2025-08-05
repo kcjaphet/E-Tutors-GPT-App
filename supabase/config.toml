@@ -49,9 +49,3 @@ verify_jwt = false
 
 [functions.text-process]
 verify_jwt = false
-
-[functions.document-upload]
-verify_jwt = false
-
-[functions.document-chat]
-verify_jwt = false
