@@ -29,7 +29,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
           className="flex items-center gap-2 text-lg font-bold text-red-600 data-[state=active]:text-red-700 data-[state=active]:bg-red-50 hover:text-red-700 hover:bg-red-50 border-red-200 data-[state=active]:border-red-300"
         >
           <BarChart3 className="w-5 h-5 text-red-600" />
-          Get Report
+          Click here to get report
           <MousePointer 
             className="w-8 h-8 text-red-500 ml-6"
             style={{ 
