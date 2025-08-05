@@ -1,7 +1,7 @@
 
-# Free Deployment Guide for GPTTextTools
+# Free Deployment Guide for e-tutors
 
-This guide explains how to deploy both frontend and backend components for free testing purposes.
+This guide explains how to deploy the e-tutors platform for free using Supabase and Vercel.
 
 ## Frontend Deployment (Vercel)
 
@@ -18,73 +18,78 @@ This guide explains how to deploy both frontend and backend components for free 
      - Output Directory: `dist`
 
 3. **Configure Environment Variables**
-   - Add `VITE_API_URL` pointing to your backend URL (from Render.com)
+   - Add `VITE_SUPABASE_URL` with your Supabase project URL
+   - Add `VITE_SUPABASE_ANON_KEY` with your Supabase anon key
 
-## Backend Deployment (Render.com)
+## Backend Setup (Supabase)
 
-1. **Create a Render Account**
-   - Sign up at [Render](https://render.com) using GitHub or email
+1. **Create a Supabase Account**
+   - Sign up at [Supabase](https://supabase.com) using GitHub or email
 
-2. **Deploy Your Backend**
-   - Create a new Web Service
-   - Connect your Git repository
-   - Configure the service:
-     - Name: `gpt-text-tools-api`
-     - Runtime: Node
-     - Build Command: `cd server && npm install`
-     - Start Command: `cd server && node index.js`
-     - Free Instance Type (will spin down after 15 minutes of inactivity)
+2. **Create a New Project**
+   - Click "New Project"
+   - Choose your organization
+   - Set project name and database password
+   - Select a region closest to your users
+   - Wait for project setup (2-3 minutes)
 
-3. **Set Environment Variables**
-   - All your required variables from `.env.example`
-   - Make sure to set `CORS_ORIGIN` to your Vercel frontend URL
+3. **Configure Authentication**
+   - Go to Authentication > Settings
+   - Enable email authentication
+   - Configure redirect URLs for your domain
+   - Set site URL to your Vercel domain
 
-## Database Setup (MongoDB Atlas)
+4. **Deploy Edge Functions**
+   ```bash
+   # Install Supabase CLI
+   npm install -g supabase
+   
+   # Login to Supabase
+   supabase login
+   
+   # Link your project
+   supabase link --project-ref your-project-ref
+   
+   # Deploy functions
+   supabase functions deploy
+   ```
 
-1. **Create a MongoDB Atlas Account**
-   - Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register)
-
-2. **Create a Free Tier Cluster**
-   - Select the "Shared" free tier option
-   - Choose a cloud provider and region closest to your users
-   - Create cluster (takes a few minutes)
-
-3. **Set Up Database Access**
-   - Create a database user with password
-   - Add your IP to the IP Access List (or allow access from anywhere for testing)
-
-4. **Get Connection String**
-   - Click "Connect" on your cluster
-   - Select "Connect your application"
-   - Copy the connection string
-   - Replace `<password>` with your database user's password
-   - Add this as `MONGO_URI` in your Render.com environment variables
+5. **Set Environment Variables in Supabase**
+   - Go to Project Settings > API
+   - Add these secrets:
+     - `SUPABASE_SERVICE_ROLE_KEY`: Your service role key
+     - `STRIPE_SECRET_KEY`: Your Stripe secret key
+     - `OPENAI_API_KEY`: Your OpenAI API key
 
 ## API Keys
 
 1. **OpenAI API**
    - Create an account at [OpenAI](https://platform.openai.com/)
-   - Generate an API key (new accounts get some free credits)
-   - Add as `OPENAI_API_KEY` in Render.com
+   - Generate an API key (new accounts get free credits)
+   - Add as a secret in Supabase dashboard
 
 2. **Stripe Testing**
-   - Use Stripe's test mode which doesn't require real payments
+   - Use Stripe's test mode for development
    - Get test API keys from the Stripe dashboard
-   - Add as `STRIPE_SECRET_KEY` in Render.com
+   - Add as a secret in Supabase dashboard
 
 ## Important Notes
 
-- **Render Free Tier Limitations**:
-  - Your service will "sleep" after 15 minutes of inactivity
-  - First request after inactivity will take 30-60 seconds to respond
-  - Limited to 750 hours of runtime per month
+- **Supabase Free Tier Limitations**:
+  - 500MB database storage
+  - 2GB bandwidth per month
+  - 100,000 reads per month
+  - 1,000 writes per month
+  - 2 million Edge Function invocations
 
-- **MongoDB Atlas Free Tier Limitations**:
-  - 512MB storage limit
-  - Shared RAM and compute resources
+- **Vercel Free Tier**:
+  - 100GB bandwidth per month
+  - 100 deployments per day
+  - Serverless function execution time limit
 
 - **OpenAI API**:
-  - While you get some free credits initially, the API isn't free long-term
-  - Monitor your usage to avoid unexpected charges
+  - Free credits available for new accounts
+  - Monitor usage to avoid unexpected charges
+  - Consider implementing usage limits
 
-This setup allows for completely free testing but has limitations in terms of performance and scale.
+This setup provides a completely free solution for testing and small-scale deployments.
