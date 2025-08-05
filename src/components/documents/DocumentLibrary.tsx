@@ -36,7 +36,16 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     try {
       setIsLoading(true);
       
-      console.log('Fetching documents...');
+      console.log('=== Starting to fetch documents ===');
+      
+      // Check if user is authenticated
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('User not authenticated:', authError);
+        throw new Error('Authentication required');
+      }
+      
+      console.log('User authenticated, fetching documents for user:', user.id);
       
       const { data, error } = await supabase
         .from('documents')
@@ -52,17 +61,21 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching documents:', error);
+        console.error('Database error fetching documents:', error);
         throw error;
       }
 
-      console.log('Documents fetched:', data?.length || 0);
+      console.log('Documents fetched successfully:', {
+        count: data?.length || 0,
+        documents: data?.map(d => ({ id: d.id, title: d.title, status: d.status }))
+      });
+      
       setDocuments(data || []);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error('=== Error in fetchDocuments ===', error);
       toast({
         title: "Error",
-        description: "Failed to load documents",
+        description: `Failed to load documents: ${error.message}`,
         variant: "destructive",
       });
     } finally {
@@ -121,17 +134,28 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
 
   const handleReprocess = async (documentId: string) => {
     try {
+      console.log('=== Starting reprocess for document:', documentId);
+      
       const { data: { session } } = await supabase.auth.getSession();
-      const { error } = await supabase.functions.invoke('process-document', {
+      if (!session?.access_token) {
+        throw new Error('No valid session found');
+      }
+      
+      console.log('Session found, calling process-document function...');
+      
+      const { data, error } = await supabase.functions.invoke('process-document', {
         body: { documentId },
         headers: {
-          Authorization: `Bearer ${session?.access_token}`,
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
 
       if (error) {
+        console.error('Function invocation error:', error);
         throw error;
       }
+
+      console.log('Function response:', data);
 
       toast({
         title: "Success",
@@ -141,10 +165,10 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
       // Refresh documents after a short delay
       setTimeout(fetchDocuments, 2000);
     } catch (error) {
-      console.error('Reprocess error:', error);
+      console.error('=== Reprocess error ===', error);
       toast({
         title: "Error",
-        description: "Failed to reprocess document",
+        description: `Failed to reprocess document: ${error.message}`,
         variant: "destructive",
       });
     }
@@ -228,7 +252,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
                   </Button>
                 )}
                 
-                {doc.status === 'failed' && (
+                {(doc.status === 'failed' || doc.status === 'processing') && (
                   <Button
                     size="sm"
                     variant="outline"
@@ -236,7 +260,7 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
                     className="gap-1"
                   >
                     <RefreshCw className="h-4 w-4" />
-                    Retry
+                    {doc.status === 'processing' ? 'Retry Process' : 'Retry'}
                   </Button>
                 )}
                 

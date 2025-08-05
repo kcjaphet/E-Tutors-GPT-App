@@ -63,13 +63,19 @@ serve(async (req) => {
     }
 
     // Download file from storage
+    console.log('Attempting to download file from path:', document.file_path);
+    
     const { data: fileData, error: downloadError } = await supabaseClient.storage
       .from('documents')
       .download(document.file_path);
 
     if (downloadError || !fileData) {
-      throw new Error('Failed to download document');
+      console.error('Download error:', downloadError);
+      console.error('File path attempted:', document.file_path);
+      throw new Error(`Failed to download document: ${downloadError?.message || 'No file data'}`);
     }
+
+    console.log('File downloaded successfully, size:', fileData.size);
 
     let extractedText = '';
     
