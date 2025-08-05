@@ -26,19 +26,17 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger 
           value="get-report" 
-          className="flex items-center gap-2 text-lg font-bold relative text-red-600 data-[state=active]:text-red-700 data-[state=active]:bg-red-50 hover:text-red-700 hover:bg-red-50 border-red-200 data-[state=active]:border-red-300"
+          className="flex items-center gap-2 text-lg font-bold text-red-600 data-[state=active]:text-red-700 data-[state=active]:bg-red-50 hover:text-red-700 hover:bg-red-50 border-red-200 data-[state=active]:border-red-300"
         >
           <BarChart3 className="w-5 h-5 text-red-600" />
           Get Report
-          <div className="absolute right-1 top-0">
-            <MousePointer 
-              className="w-5 h-5 text-red-500"
-              style={{ 
-                transform: 'rotate(-15deg)',
-                animation: 'pointing-motion 2s ease-in-out infinite, flash 3s infinite'
-              }}
-            />
-          </div>
+          <MousePointer 
+            className="w-5 h-5 text-red-500 ml-6"
+            style={{ 
+              transform: 'rotate(-15deg)',
+              animation: 'pointing-motion 2s ease-in-out infinite, flash 3s infinite'
+            }}
+          />
         </TabsTrigger>
         <TabsTrigger value="learn-more" className="flex items-center gap-2 text-lg font-bold">
           <BookOpen className="w-5 h-5" />
