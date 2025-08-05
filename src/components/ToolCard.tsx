@@ -25,7 +25,7 @@ const ToolCard: React.FC<ToolCardProps> = ({
         "hover:bg-secondary/50 hover:-translate-y-1 hover:shadow-md",
         isSelected 
           ? "border-primary bg-primary/5" 
-          : "border-border bg-card"
+          : "border-border bg-blue-bg"
       )}
     >
       <div className="flex flex-col gap-2">
