@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Process document request received');
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
@@ -21,7 +23,10 @@ serve(async (req) => {
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (!authHeader) {
+      console.error('No authorization header provided');
       throw new Error('No authorization header');
     }
 
@@ -30,12 +35,16 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(jwt);
     
     if (authError || !user) {
+      console.error('Authentication failed:', authError);
       throw new Error('Authentication failed');
     }
+
+    console.log('User authenticated:', user.id);
 
     const { documentId } = await req.json();
     
     if (!documentId) {
+      console.error('No document ID provided');
       throw new Error('Document ID is required');
     }
 

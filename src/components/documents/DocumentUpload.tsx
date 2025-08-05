@@ -73,9 +73,13 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
         throw docError;
       }
 
-      // Process document to extract text
+      // Process document to extract text with authentication
+      const { data: { session } } = await supabase.auth.getSession();
       const { error: processError } = await supabase.functions.invoke('process-document', {
-        body: { documentId: documentData.id }
+        body: { documentId: documentData.id },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       });
 
       if (processError) {

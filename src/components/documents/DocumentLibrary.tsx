@@ -36,6 +36,8 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
     try {
       setIsLoading(true);
       
+      console.log('Fetching documents...');
+      
       const { data, error } = await supabase
         .from('documents')
         .select(`
@@ -50,9 +52,11 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching documents:', error);
         throw error;
       }
 
+      console.log('Documents fetched:', data?.length || 0);
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching documents:', error);
@@ -117,8 +121,12 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
 
   const handleReprocess = async (documentId: string) => {
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.functions.invoke('process-document', {
-        body: { documentId }
+        body: { documentId },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
       });
 
       if (error) {
