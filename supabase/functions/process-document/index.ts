@@ -19,6 +19,13 @@ serve(async (req) => {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      {
+        global: {
+          headers: {
+            Authorization: req.headers.get('Authorization') ?? '',
+          },
+        },
+      }
     );
 
     // Get the authorization header
@@ -50,7 +57,9 @@ serve(async (req) => {
 
     console.log('Processing document:', documentId);
 
-    // Get document from database
+    // Get document from database with detailed logging
+    console.log('Querying document with:', { documentId, userId: user.id });
+    
     const { data: document, error: docError } = await supabaseClient
       .from('documents')
       .select('*')
@@ -58,7 +67,30 @@ serve(async (req) => {
       .eq('user_id', user.id)
       .single();
 
-    if (docError || !document) {
+    console.log('Document query result:', { 
+      found: !!document, 
+      error: docError?.message || null,
+      errorCode: docError?.code || null,
+      errorDetails: docError?.details || null 
+    });
+
+    if (docError) {
+      console.error('Database error details:', docError);
+      throw new Error(`Database error: ${docError.message}`);
+    }
+
+    if (!document) {
+      console.error('No document found for ID:', documentId, 'and user:', user.id);
+      
+      // Let's also try to see if the document exists at all (for debugging)
+      const { data: anyDoc, error: anyError } = await supabaseClient
+        .from('documents')
+        .select('id, user_id, title')
+        .eq('id', documentId)
+        .single();
+      
+      console.log('Document exists check:', { anyDoc, anyError });
+      
       throw new Error('Document not found or access denied');
     }
 
