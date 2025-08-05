@@ -205,9 +205,15 @@ export const DocumentLibrary: React.FC<DocumentLibraryProps> = ({
       <Card className="p-8 text-center">
         <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">No Documents Yet</h3>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground mb-4">
           Upload your first document to get started with AI-powered document chat
         </p>
+        <button 
+          onClick={() => console.log('Testing click - documents empty')}
+          className="text-sm text-blue-500 underline"
+        >
+          Debug: Click to test console
+        </button>
       </Card>
     );
   }

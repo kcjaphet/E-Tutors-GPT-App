@@ -1,21 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@/components/ui/card';
 import { DocumentUpload } from '@/components/documents/DocumentUpload';
 import { DocumentLibrary } from '@/components/documents/DocumentLibrary';
 import { DocumentChat } from '@/components/documents/DocumentChat';
 import { FileText, Upload, MessageCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 type ViewMode = 'library' | 'chat';
 
 const Documents = () => {
   const { t } = useTranslation();
+  const { currentUser, loading } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>('library');
   const [selectedDocument, setSelectedDocument] = useState<{
     id: string;
     title: string;
   } | null>(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    console.log('Documents page loaded, user:', currentUser ? 'authenticated' : 'not authenticated');
+  }, [currentUser]);
 
   const handleUploadComplete = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -30,6 +37,15 @@ const Documents = () => {
     setViewMode('library');
     setSelectedDocument(null);
   };
+
+  // Redirect to auth if not logged in
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  }
+  
+  if (!currentUser) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
