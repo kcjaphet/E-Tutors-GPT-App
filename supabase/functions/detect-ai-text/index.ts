@@ -38,38 +38,32 @@ serve(async (req) => {
   }
 
   try {
-    // Authentication check
-    const authHeader = req.headers.get('authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Authentication required' 
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    );
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    // Get user ID from request or use anonymous
+    let userId = 'anonymous';
     
-    if (userError || !user) {
-      return new Response(JSON.stringify({ 
-        success: false, 
-        message: 'Invalid authentication' 
-      }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Optional authentication - try to get user if provided
+    const authHeader = req.headers.get('authorization');
+    if (authHeader) {
+      try {
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+        );
+
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+        
+        if (!userError && user) {
+          userId = user.id;
+        }
+      } catch (authError) {
+        console.log('Auth failed, using anonymous:', authError);
+      }
     }
 
-    // Rate limiting
-    if (!checkRateLimit(user.id, 20, 60000)) { // 20 requests per minute
+    // Rate limiting (more lenient for anonymous users)
+    const rateLimit = userId === 'anonymous' ? 10 : 20;
+    if (!checkRateLimit(userId, rateLimit, 60000)) {
       return new Response(JSON.stringify({ 
         success: false, 
         message: 'Rate limit exceeded. Please try again later.' 
@@ -81,7 +75,7 @@ serve(async (req) => {
 
     console.log('Processing request body...');
     const { text } = await req.json();
-    console.log('Request data:', { textLength: text?.length, userId: user.id });
+    console.log('Request data:', { textLength: text?.length, userId });
 
     if (!text || text.trim().length === 0) {
       return new Response(
