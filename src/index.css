@@ -4,6 +4,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Flash Animation for Attention */
+@keyframes flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.5; }
+}
+
+@keyframes pointing-motion {
+  0%, 100% { transform: translateX(0) rotate(-30deg); }
+  50% { transform: translateX(8px) rotate(-30deg); }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

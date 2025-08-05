@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, BarChart3, BookOpen } from 'lucide-react';
+import { Search, BarChart3, BookOpen, Hand } from 'lucide-react';
 
 interface NavigationTabsProps {
   activeTab: string;
@@ -24,9 +24,21 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
           <Search className="w-5 h-5" />
           Check Text
         </TabsTrigger>
-        <TabsTrigger value="get-report" className="flex items-center gap-2 text-lg font-bold">
-          <BarChart3 className="w-5 h-5" />
+        <TabsTrigger 
+          value="get-report" 
+          className="flex items-center gap-2 text-lg font-bold relative text-red-600 data-[state=active]:text-red-700 data-[state=active]:bg-red-50 hover:text-red-700 hover:bg-red-50 border-red-200 data-[state=active]:border-red-300"
+        >
+          <BarChart3 className="w-5 h-5 text-red-600" />
           Get Report
+          <div className="absolute -right-8 -top-2">
+            <Hand 
+              className="w-6 h-6 text-red-500"
+              style={{ 
+                transform: 'rotate(-30deg)',
+                animation: 'pointing-motion 2s ease-in-out infinite, flash 3s infinite'
+              }}
+            />
+          </div>
         </TabsTrigger>
         <TabsTrigger value="learn-more" className="flex items-center gap-2 text-lg font-bold">
           <BookOpen className="w-5 h-5" />
