@@ -63,6 +63,15 @@ const Header: React.FC = () => {
               {t('nav.products')}
             </NavLink>
             <NavLink 
+              to="/documents" 
+              className={({isActive}) => cn(
+                "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",
+                isActive ? "text-primary font-medium" : "text-muted-foreground"
+              )}
+            >
+              Documents
+            </NavLink>
+            <NavLink 
               to="/pricing" 
               className={({isActive}) => cn(
                 "text-sm transition-colors hover:text-primary focus-ring rounded-md px-2 py-1",

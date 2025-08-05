@@ -16,6 +16,7 @@ import NotFound from '@/pages/NotFound';
 import LiteratureReview from '@/pages/LiteratureReview';
 import PDFSummary from '@/pages/PDFSummary';
 import AIDetection from '@/pages/AIDetection';
+import Documents from '@/pages/Documents';
 
 function App() {
   return (
@@ -79,6 +80,14 @@ function App() {
               <Route path="/literature-review" element={<LiteratureReview />} />
               <Route path="/pdf-summary" element={<PDFSummary />} />
               <Route path="/ai-detection" element={<AIDetection />} />
+              <Route 
+                path="/documents" 
+                element={
+                  <ProtectedRoute>
+                    <Documents />
+                  </ProtectedRoute>
+                } 
+              />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
