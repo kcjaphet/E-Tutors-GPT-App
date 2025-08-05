@@ -125,22 +125,11 @@ export const useTextOperations = (
       console.log('Making API call to:', API_ENDPOINTS.DETECT_AI_TEXT);
       console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.uid || 'anonymous' });
       
-      // Get auth token from Supabase
-      const { data: { session } } = await import('@/integrations/supabase/client').then(m => m.supabase.auth.getSession());
-      const authHeaders = session?.access_token 
-        ? { ...API_CONFIG.HEADERS, Authorization: `Bearer ${session.access_token}` }
-        : API_CONFIG.HEADERS;
-
-      console.log('Auth headers for AI detection:', { 
-        hasToken: !!session?.access_token, 
-        userId: currentUser?.uid || 'anonymous' 
-      });
-
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
         {
           method: 'POST',
-          headers: authHeaders,
+          headers: API_CONFIG.HEADERS,
           body: JSON.stringify({ 
             text: inputText,
             userId: currentUser?.uid || 'anonymous'
@@ -152,13 +141,8 @@ export const useTextOperations = (
       const responseData = await response.json();
       console.log('API response data:', responseData);
       
-      if (responseData.success && responseData.data) {
-        setDetectionResult(responseData.data);
-        console.log('Detection result set:', responseData.data);
-      } else {
-        console.error('Invalid response structure:', responseData);
-        throw new Error(responseData.message || 'Invalid response from detection service');
-      }
+      setDetectionResult(responseData.data);
+      console.log('Detection result set:', responseData.data);
       
       // Format result for display - now handled by ResultCard component
       setResultText("AI Detection Complete");
