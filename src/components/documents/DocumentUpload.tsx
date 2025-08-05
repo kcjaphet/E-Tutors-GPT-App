@@ -17,9 +17,12 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
   const { t } = useTranslation();
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    console.log('Upload started with files:', acceptedFiles);
+    
     if (acceptedFiles.length === 0) return;
     
     const file = acceptedFiles[0];
+    console.log('Processing file:', file.name, file.size, file.type);
     
     // Validate file size (50MB limit)
     if (file.size > 52428800) {
@@ -35,22 +38,38 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ onUploadComplete
 
     try {
       // Get current user
+      console.log('Getting user authentication...');
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (authError) throw authError;
-      if (!user) throw new Error('Authentication required');
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+      if (!user) {
+        console.error('No authenticated user found');
+        throw new Error('Authentication required');
+      }
+      
+      console.log('User authenticated:', user.id);
 
       // Create unique file path
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
+      
+      console.log('Uploading to storage path:', filePath);
 
       // Upload file to storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Storage upload failed:', uploadError);
+        throw uploadError;
+      }
+      
+      console.log('Storage upload successful:', uploadData);
 
       // Create document record
       const { data: documentData, error: docError } = await supabase
