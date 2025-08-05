@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { RefreshCw } from 'lucide-react';
 import LanguageSelect from './LanguageSelect';
@@ -20,6 +21,8 @@ const ToolForm: React.FC<ToolFormProps> = ({
   setTone,
   handleSubmit
 }) => {
+  const { t } = useTranslation();
+  
   const onCopy = () => {
     navigator.clipboard.writeText(outputText);
   };
@@ -29,10 +32,10 @@ const ToolForm: React.FC<ToolFormProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <label htmlFor="inputText" className="text-sm font-medium">
-            Enter your text
+            {t('tools.inputLabel')}
           </label>
           <div className="text-xs text-muted-foreground">
-            {inputText.length} characters
+            {inputText.length} {t('tools.charactersCount')}
           </div>
         </div>
         <textarea
@@ -64,11 +67,11 @@ const ToolForm: React.FC<ToolFormProps> = ({
           {isProcessing ? (
             <>
               <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
+              {t('tools.processing')}
             </>
           ) : (
             <>
-              {tools.find(t => t.id === selectedTool)?.title || 'Process'} Text
+              {tools.find(tool => tool.id === selectedTool)?.title || t('tools.processText')}
             </>
           )}
         </button>

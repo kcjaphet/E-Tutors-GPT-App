@@ -3,11 +3,14 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { LogOut, User } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header: React.FC = () => {
   const { currentUser, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [logoError, setLogoError] = useState(false);
 
@@ -48,7 +51,7 @@ const Header: React.FC = () => {
               )}
               end
             >
-              Home
+              {t('nav.home')}
             </NavLink>
             <NavLink 
               to="/products" 
@@ -57,7 +60,7 @@ const Header: React.FC = () => {
                 isActive ? "text-primary font-medium" : "text-muted-foreground"
               )}
             >
-              Products
+              {t('nav.products')}
             </NavLink>
             <NavLink 
               to="/pricing" 
@@ -66,12 +69,13 @@ const Header: React.FC = () => {
                 isActive ? "text-primary font-medium" : "text-muted-foreground"
               )}
             >
-              Pricing
+              {t('nav.pricing')}
             </NavLink>
           </nav>
         </div>
         
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           {currentUser ? (
             <div className="flex items-center gap-4">
               <div className="text-sm hidden md:block">
@@ -94,14 +98,14 @@ const Header: React.FC = () => {
                 onClick={() => navigate('/auth?mode=login')}
                 className="text-sm"
               >
-                Login
+                {t('nav.login')}
               </Button>
               <Button
                 size="sm"
                 onClick={() => navigate('/auth?mode=signup')}
                 className="text-sm"
               >
-                Sign up
+                {t('nav.signup')}
               </Button>
             </div>
           )}
