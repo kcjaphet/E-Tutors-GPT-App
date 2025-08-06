@@ -123,7 +123,7 @@ export const useTextOperations = (
     
     try {
       console.log('Making API call to:', API_ENDPOINTS.DETECT_AI_TEXT);
-      console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.uid || 'anonymous' });
+      console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.id || 'anonymous' });
       
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
@@ -132,7 +132,7 @@ export const useTextOperations = (
           headers: API_CONFIG.HEADERS,
           body: JSON.stringify({ 
             text: inputText,
-            userId: currentUser?.uid || 'anonymous'
+            userId: currentUser?.id || 'anonymous'
           }),
         }
       );
@@ -181,7 +181,7 @@ export const useTextOperations = (
 
     setDetectionResult(null);
     
-    const result = await humanizeText(inputText, currentUser?.uid || 'anonymous', () => {
+    const result = await humanizeText(inputText, currentUser?.id || 'anonymous', () => {
       // Refresh subscription data to get updated usage
       fetchSubscription();
     });
