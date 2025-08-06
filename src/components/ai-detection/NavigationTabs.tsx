@@ -24,7 +24,7 @@ const NavigationTabs: React.FC<NavigationTabsProps> = ({
           <Search className="w-5 h-5" />
           Check Text
         </TabsTrigger>
-        <TabsTrigger value="get-report" className="flex items-center gap-2 text-lg font-bold">
+        <TabsTrigger value="get-report" className="flex items-center gap-2 text-lg font-bold bg-red-500 text-white hover:bg-red-600 data-[state=active]:bg-red-600 report-arrow">
           <BarChart3 className="w-5 h-5" />
           Get Report
         </TabsTrigger>
