@@ -41,7 +41,6 @@ const ResultCard: React.FC<ResultCardProps> = ({
   textCopied,
   inputText
 }) => {
-  console.log('ResultCard render:', { detectionResult, humanizationResult, hasData: !!(detectionResult || humanizationResult) });
   if (!detectionResult && !humanizationResult) return null;
 
   // Helper function to highlight suspicious segments in text

@@ -46,7 +46,6 @@ export const useHumanization = () => {
       }
       
       if (retries > 0) {
-        console.log(`Retrying request. Attempts remaining: ${retries}`);
         // Wait a bit before retrying (exponential backoff)
         await new Promise(resolve => setTimeout(resolve, 1000 * (API_CONFIG.RETRY_ATTEMPTS - retries + 1)));
         return fetchWithRetry(url, options, retries - 1);

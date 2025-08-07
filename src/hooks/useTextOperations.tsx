@@ -87,7 +87,6 @@ export const useTextOperations = (
       }
       
       if (retries > 0) {
-        console.log(`Retrying request. Attempts remaining: ${retries}`);
         // Wait a bit before retrying (exponential backoff)
         await new Promise(resolve => setTimeout(resolve, 1000 * (API_CONFIG.RETRY_ATTEMPTS - retries + 1)));
         return fetchWithRetry(url, options, retries - 1);
@@ -122,9 +121,6 @@ export const useTextOperations = (
     setHumanizationResult(null);
     
     try {
-      console.log('Making API call to:', API_ENDPOINTS.DETECT_AI_TEXT);
-      console.log('Request payload:', { text: inputText.substring(0, 100), userId: currentUser?.id || 'anonymous' });
-      
       const response = await fetchWithRetry(
         API_ENDPOINTS.DETECT_AI_TEXT, 
         {
@@ -137,12 +133,8 @@ export const useTextOperations = (
         }
       );
       
-      console.log('API response status:', response.status);
       const responseData = await response.json();
-      console.log('API response data:', responseData);
-      
       setDetectionResult(responseData.data);
-      console.log('Detection result set:', responseData.data);
       
       // Format result for display - now handled by ResultCard component
       setResultText("AI Detection Complete");

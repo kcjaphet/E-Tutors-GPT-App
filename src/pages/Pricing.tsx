@@ -61,8 +61,6 @@ const Pricing: React.FC = () => {
         throw new Error(error.message || 'Failed to create checkout session');
       }
       
-      console.log("Checkout response:", sessionData);
-      
       // Important: directly redirect to Stripe checkout URL
       if (sessionData.success && sessionData.url) {
         window.location.href = sessionData.url;
