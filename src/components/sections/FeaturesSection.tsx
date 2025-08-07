@@ -4,8 +4,8 @@ import React from 'react';
 const FeaturesSection: React.FC = () => {
   const features = [
     {
-      title: 'Effortless Processing',
-      description: 'Transform your text with just a few clicks. No complicated setup or technical knowledge required.',
+      title: 'Real-Time Analysis',
+      description: 'Get instant feedback as you type with live AI detection and analysis for immediate insights.',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
           <path d="M10.1 2.182a10 10 0 0 1 3.8 0"></path>
@@ -21,23 +21,57 @@ const FeaturesSection: React.FC = () => {
       ),
     },
     {
-      title: 'AI-Powered Intelligence',
-      description: 'Leverage advanced AI models to improve, transform, and enhance your text with remarkable accuracy.',
+      title: 'Advanced Text Metrics',
+      description: 'Comprehensive text analysis including readability scores, sentiment analysis, and writing insights.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+          <path d="M3 3v18h18"></path>
+          <path d="m19 9-5 5-4-4-3 3"></path>
+        </svg>
+      ),
+    },
+    {
+      title: 'Professional Templates',
+      description: 'Start with expert-crafted templates for emails, essays, reports, and business documents.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14,2 14,8 20,8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10,9 9,9 8,9"></polyline>
+        </svg>
+      ),
+    },
+    {
+      title: 'Enhanced Export Options',
+      description: 'Download, share, and export your results in multiple formats with one-click actions.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7,10 12,15 17,10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      ),
+    },
+    {
+      title: 'Usage Analytics',
+      description: 'Track your productivity with detailed analytics showing usage patterns and performance metrics.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+      ),
+    },
+    {
+      title: 'Smart Processing',
+      description: 'Intelligent text processing with context awareness and adaptive algorithms for better results.',
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
           <path d="M12 2H2v10h10V2Z"></path>
           <path d="M12 22h10V12H12v10Z"></path>
           <path d="m4.93 12.93 4.24 4.24"></path>
           <path d="M2 22 22 2"></path>
-        </svg>
-      ),
-    },
-    {
-      title: 'Multiple Tools in One',
-      description: 'Access a wide range of text tools all in one place. Summary, paraphrasing, translation, and more.',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
-          <path d="M12 3c.53 0 1.039.211 1.414.586s.586.884.586 1.414-.211 1.039-.586 1.414S12.53 7 12 7s-1.039-.211-1.414-.586S10 5.53 10 5s.211-1.039.586-1.414S11.47 3 12 3zm0 17c.53 0 1.039-.211 1.414-.586s.586-.884.586-1.414-.211-1.039-.586-1.414S12.53 16 12 16s-1.039.211-1.414.586S10 17.47 10 18s.211 1.039.586 1.414S11.47 20 12 20zm-7-7c.53 0 1.039-.211 1.414-.586S7 11.53 7 11s-.211-1.039-.586-1.414S5.53 9 5 9s-1.039.211-1.414.586S3 9.47 3 10s.211 1.039.586 1.414S4.47 13 5 13zm14 0c.53 0 1.039-.211 1.414-.586S21 11.53 21 11s-.211-1.039-.586-1.414S19.53 9 19 9s-1.039.211-1.414.586S17 9.47 17 10s.211 1.039.586 1.414S18.47 13 19 13z"></path>
         </svg>
       ),
     },
@@ -52,17 +86,22 @@ const FeaturesSection: React.FC = () => {
         </p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feature, index) => (
           <div 
             key={index} 
-            className="flex flex-col items-center text-center p-6 rounded-lg border bg-card shadow-sm hover:shadow-md transition-shadow duration-300"
+            className="group flex flex-col items-center text-center p-6 rounded-lg border bg-card shadow-sm hover:shadow-lg hover:border-primary/20 transition-all duration-300 animate-fade-in"
+            style={{ animationDelay: `${index * 100}ms` }}
           >
-            <div className="mb-4 p-3 rounded-full bg-primary/10">
+            <div className="mb-4 p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
               {feature.icon}
             </div>
-            <h3 className="text-xl font-medium mb-2">{feature.title}</h3>
-            <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+            <h3 className="text-lg font-semibold mb-3 group-hover:text-primary transition-colors">
+              {feature.title}
+            </h3>
+            <p className="text-muted-foreground leading-relaxed text-sm">
+              {feature.description}
+            </p>
           </div>
         ))}
       </div>
