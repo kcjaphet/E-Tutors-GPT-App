@@ -10,14 +10,6 @@ const Footer: React.FC = () => {
       <div className="container flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
         <div className="flex flex-col md:flex-row items-center gap-4">
           <p>© {currentYear} GPTTextTools. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link to="/privacy" className="hover:text-primary transition-colors focus-ring rounded-md px-2 py-1">
-              Privacy
-            </Link>
-            <Link to="/terms" className="hover:text-primary transition-colors focus-ring rounded-md px-2 py-1">
-              Terms
-            </Link>
-          </div>
         </div>
         
         <div className="flex items-center gap-4">
