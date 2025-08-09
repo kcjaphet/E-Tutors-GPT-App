@@ -58,27 +58,30 @@ serve(async (req) => {
         userPrompt = `Please paraphrase the following text: "${text}"`;
         break;
       
-      case 'translate':
+      case 'translate': {
         const language = options.language || 'Spanish';
         systemPrompt = `You are a professional translator. Translate text accurately while maintaining the original tone and meaning.`;
         userPrompt = `Please translate the following text to ${language}: "${text}"`;
         break;
+      }
       
       case 'grammar':
         systemPrompt = 'You are a grammar expert. Correct grammar, spelling, and punctuation errors while maintaining the original meaning and style.';
         userPrompt = `Please correct the grammar in the following text: "${text}"`;
         break;
       
-      case 'tone':
+      case 'tone': {
         const tone = options.tone || 'professional';
         systemPrompt = `You are an expert at adjusting text tone. Rewrite text to match the specified tone while preserving the core message.`;
         userPrompt = `Please rewrite the following text in a ${tone} tone: "${text}"`;
         break;
+      }
       
-      case 'enhance':
-        systemPrompt = 'You are a writing enhancement expert. Improve text clarity, flow, and impact while maintaining the original meaning.';
-        userPrompt = `Please enhance and improve the following text: "${text}"`;
-        break;
+    case 'enhance': {
+      systemPrompt = 'You are a writing enhancement expert. Improve text clarity, flow, and impact while maintaining the original meaning.';
+      userPrompt = `Please enhance and improve the following text: "${text}"`;
+      break;
+    }
       
       default:
         return new Response(

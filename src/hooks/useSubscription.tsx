@@ -42,9 +42,7 @@ export const useSubscription = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
-      fetchSubscription();
-    }
+    fetchSubscription();
   }, [currentUser, fetchSubscription]);
 
   const getRemainingUsage = () => {

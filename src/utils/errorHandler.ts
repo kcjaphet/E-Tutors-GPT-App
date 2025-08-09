@@ -5,7 +5,7 @@
 export interface ErrorLog {
   message: string;
   stack?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   timestamp: string;
   url: string;
   userAgent: string;
@@ -24,7 +24,7 @@ export class ErrorHandler {
   /**
    * Log error for monitoring (in production, send to monitoring service)
    */
-  public logError(error: Error, context?: Record<string, any>): void {
+  public logError(error: Error, context?: Record<string, unknown>): void {
     const errorLog: ErrorLog = {
       message: error.message,
       stack: error.stack,
@@ -100,7 +100,7 @@ export class ErrorHandler {
    */
   public async withErrorHandling<T>(
     operation: () => Promise<T>,
-    context?: Record<string, any>
+    context?: Record<string, unknown>
   ): Promise<T> {
     try {
       return await operation();

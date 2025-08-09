@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -20,7 +20,7 @@ export const useSubscriptionStatus = () => {
     error: null
   });
 
-  const checkSubscription = async () => {
+  const checkSubscription = useCallback(async () => {
     if (!currentUser || !session) {
       setStatus(prev => ({ ...prev, loading: false }));
       return;
@@ -52,7 +52,7 @@ export const useSubscriptionStatus = () => {
         error: error instanceof Error ? error.message : 'Failed to check subscription status'
       }));
     }
-  };
+  }, [currentUser, session]);
 
   const hasFeatureAccess = (feature: 'detection' | 'humanization' | 'premium') => {
     if (status.loading) return false;
@@ -76,10 +76,8 @@ export const useSubscriptionStatus = () => {
   };
 
   useEffect(() => {
-    if (currentUser) {
-      checkSubscription();
-    }
-  }, [currentUser, session]);
+    checkSubscription();
+  }, [checkSubscription]);
 
   return {
     ...status,

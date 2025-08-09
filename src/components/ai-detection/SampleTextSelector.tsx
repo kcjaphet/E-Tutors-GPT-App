@@ -44,7 +44,7 @@ const SampleTextSelector: React.FC<SampleTextSelectorProps> = ({ onSampleSelect 
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs value={selectedCategory} onValueChange={(value) => setSelectedCategory(value as any)}>
+        <Tabs value={selectedCategory} onValueChange={(value: string) => setSelectedCategory(value as 'essay' | 'creative' | 'technical')}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="essay" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
