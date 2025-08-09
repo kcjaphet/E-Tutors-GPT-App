@@ -63,10 +63,11 @@ const PasswordUpdateForm: React.FC = () => {
 
       // Reset form
       form.reset();
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         title: "Error",
-        description: error.message || "Failed to update password",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

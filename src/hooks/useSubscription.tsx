@@ -45,7 +45,7 @@ export const useSubscription = () => {
     if (currentUser) {
       fetchSubscription();
     }
-  }, [currentUser]);
+  }, [currentUser, fetchSubscription]);
 
   const getRemainingUsage = () => {
     if (!subscription) return { detections: 0, humanizations: 0 };

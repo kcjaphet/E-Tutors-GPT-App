@@ -79,11 +79,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Account created",
         description: "Please check your email to confirm your account!"
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         variant: "destructive",
         title: "Signup failed",
-        description: error.message || "Failed to create account"
+        description: errorMessage
       });
       throw error;
     }
@@ -103,11 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Welcome back!",
         description: "You've successfully logged in."
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid credentials';
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error.message || "Invalid credentials"
+        description: errorMessage
       });
       throw error;
     }
@@ -124,11 +126,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Logged out",
         description: "You've been successfully logged out."
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         variant: "destructive",
         title: "Logout failed",
-        description: error.message
+        description: errorMessage
       });
       throw error;
     }
@@ -145,11 +148,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
       toast({
         variant: "destructive",
         title: "Google login failed",
-        description: error.message || "Failed to sign in with Google"
+        description: errorMessage
       });
       throw error;
     }
@@ -170,11 +174,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Password reset email sent",
         description: "Check your inbox for the reset link."
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       toast({
         variant: "destructive",
         title: "Password reset failed",
-        description: error.message
+        description: errorMessage
       });
       throw error;
     }

@@ -44,12 +44,12 @@ export const useSubscriptionStatus = () => {
         loading: false,
         error: null
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error checking subscription:', error);
       setStatus(prev => ({
         ...prev,
         loading: false,
-        error: error.message || 'Failed to check subscription status'
+        error: error instanceof Error ? error.message : 'Failed to check subscription status'
       }));
     }
   };

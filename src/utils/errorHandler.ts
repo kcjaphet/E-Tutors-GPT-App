@@ -47,8 +47,9 @@ export class ErrorHandler {
   /**
    * Handle API errors with user-friendly messages
    */
-  public handleApiError(error: any): string {
-    if (error?.message) {
+  public handleApiError(error: unknown): string {
+    // Type guard for error objects with message property
+    if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
       // Supabase/PostgreSQL errors
       if (error.message.includes('JWT')) {
         return 'Your session has expired. Please log in again.';
@@ -72,7 +73,7 @@ export class ErrorHandler {
     }
 
     // HTTP status codes
-    if (error?.status) {
+    if (error && typeof error === 'object' && 'status' in error && typeof error.status === 'number') {
       switch (error.status) {
         case 400:
           return 'Invalid request. Please check your input.';

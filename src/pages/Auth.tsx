@@ -56,8 +56,9 @@ const Auth: React.FC = () => {
       setLoading(true);
       await signup(email, password, name);
       // Success is handled by the AuthContext toast
-    } catch (err: any) {
-      setError(err.message || "Failed to create account");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create account";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,8 +77,9 @@ const Auth: React.FC = () => {
       setLoading(true);
       await login(email, password);
       navigate(returnTo);
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to sign in";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -96,8 +98,9 @@ const Auth: React.FC = () => {
       setLoading(true);
       await resetPassword(email);
       setResetMode(false);
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset email");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to send reset email";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -107,8 +110,9 @@ const Auth: React.FC = () => {
     try {
       setLoading(true);
       await loginWithGoogle();
-    } catch (err: any) {
-      setError(err.message || "Failed to sign in with Google");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to sign in with Google";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

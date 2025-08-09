@@ -4,7 +4,13 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Clock, Target, TrendingUp } from 'lucide-react';
 
 interface UsageAnalyticsProps {
-  subscription: any;
+  subscription: {
+    usageThisMonth: {
+      detections: number;
+      humanizations: number;
+    };
+    planType: string;
+  } | null;
 }
 
 const UsageAnalytics: React.FC<UsageAnalyticsProps> = ({ subscription }) => {

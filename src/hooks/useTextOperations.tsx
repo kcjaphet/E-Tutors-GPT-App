@@ -16,7 +16,7 @@ export interface DetectionResult {
 }
 
 export const useTextOperations = (
-  currentUser: any, 
+  currentUser: { id: string; email?: string } | null, 
   subscription: Subscription | null, 
   fetchSubscription: () => Promise<void>
 ) => {

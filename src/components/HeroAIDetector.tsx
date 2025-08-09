@@ -12,21 +12,23 @@ const HeroAIDetector: React.FC = () => {
   const { currentUser } = useAuth();
   const { subscription, fetchSubscription } = useSubscription();
   
+  // Move hook calls outside try/catch to comply with Rules of Hooks
+  const {
+    inputText,
+    resultText,
+    isDetecting,
+    isHumanizing,
+    textCopied,
+    detectionResult,
+    humanizationResult,
+    handleTextChange,
+    detectAIText,
+    humanizeText,
+    copyToClipboard
+  } = useTextOperations(currentUser, subscription, fetchSubscription);
+
   // Add error boundary handling
   try {
-    const {
-      inputText,
-      resultText,
-      isDetecting,
-      isHumanizing,
-      textCopied,
-      detectionResult,
-      humanizationResult,
-      handleTextChange,
-      detectAIText,
-      humanizeText,
-      copyToClipboard
-    } = useTextOperations(currentUser, subscription, fetchSubscription);
 
     return (
       <div className="w-full max-w-4xl mx-auto space-y-6">
@@ -106,7 +108,7 @@ const HeroAIDetector: React.FC = () => {
         )}
       </div>
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in HeroAIDetector:', error);
     return (
       <div className="w-full max-w-4xl mx-auto">
